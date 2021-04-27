@@ -12,8 +12,9 @@
 			<div style="flex:1"></div>
 			<el-button type="danger" size="medium" icon="el-icon-top-left" round @click="logout()">登出</el-button>
 		</div>
-		<el-row>
-			<el-card>
+		<div style="display: flex; flex-direction: row; gap: 20px">
+
+			<el-card style="flex: 2;">
 				<el-table height="500" :data=" list" style="width: 100%">
 					<el-table-column prop="cid" label="课号">
 					</el-table-column>
@@ -33,11 +34,32 @@
 								icon="el-icon-edit" circle></el-button>
 							<el-button @click="delete_Course(scope.row)" type="danger" size="small"
 								icon="el-icon-delete" circle></el-button>
+							<el-button @click="get_Student(scope.row)" type="warning" size="small" icon="el-icon-more"
+								circle></el-button>
 						</template>
 					</el-table-column>
 				</el-table>
 			</el-card>
-		</el-row>
+			<div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
+				<h1 style="margin: 0px; color: white;">{{currentCourse}}</h1>
+				<el-card>
+					<el-table height="500" :data="studentslist" style="width: 100%">
+						<el-table-column prop="sid" label="学号">
+						</el-table-column>
+						<el-table-column prop="name" label="姓名">
+						</el-table-column>
+						<el-table-column prop="grade" label="成绩">
+						</el-table-column>
+						<el-table-column label="操作" width="70">
+							<template slot-scope="scope">
+								<el-button @click="delete_Election(scope.row)" type="danger" size="small"
+									icon="el-icon-delete" circle></el-button>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-card>
+			</div>
+		</div>
 
 		<el-dialog :visible.sync="addDialog" width="400px">
 			<el-form :model="courseForm" ref="ruleForm" class="demo-ruleForm">
@@ -132,7 +154,9 @@
 					tuid: '',
 					credit: 1,
 					depart: ''
-				}
+				},
+				currentCourse: '无选中课程',
+				studentslist: []
 			}
 		},
 		methods: {
@@ -183,6 +207,45 @@
 								message: res.data.data,
 								showClose: true
 							});
+						}
+					}).then(() => {
+						this.refresh_CourseList()
+					})
+			},
+			delete_Election(row) {
+				console.log(row)
+				this.$axios.post("http://127.0.0.1:8000/course/deleteElect/", { id: row.eid })
+					.then(res => {
+						console.log('res=>', res);
+						if (res.data.state === 'failed') {
+							this.$message.error({
+								message: res.data.data,
+								showClose: true
+							});
+						}
+						else {
+							this.$message.success({
+								message: res.data.data,
+								showClose: true
+							});
+						}
+					}).then(() => {
+						this.get_Student({ id: row.cid, name: this.currentCourse })
+					})
+			},
+			get_Student(row) {
+				this.currentCourse = row.cid + " " + row.name
+				this.$axios.post("http://127.0.0.1:8000/students/getByCourse/", { id: row.id })
+					.then(res => {
+						// console.log('res=>', res);
+						if (res.data.state === 'failed') {
+							this.$message.error({
+								message: res.data.data,
+								showClose: true
+							});
+						}
+						else {
+							this.studentslist = res.data.list
 						}
 					}).then(() => {
 						this.refresh_CourseList()

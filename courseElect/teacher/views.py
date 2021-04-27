@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
 from teacher.models import Teacher
+from course.models import Course
+from currentTerm.models import CurrentTerm
 from django.core.paginator import Paginator
 from django.db import connection
 from django.db.utils import IntegrityError
@@ -140,3 +142,59 @@ def get_CourseGrade(request):
                 "SELECT e.id euid , s.id id, s.sid sid, s.name name, e.grade grade, c.id cuid FROM election_election e JOIN course_course c on E.cid_id = c.id join student_student s on e.sid_id = s.id WHERE c.id = %s", [request.params['id']])
             ret = list(dictfetchall(cursor))
             return JsonResponse({'list': ret})
+
+
+def apply_Course(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        try:
+            teacher = Teacher.objects.get(id=request.params['tid'])
+            term = CurrentTerm.objects.get(id=1)
+        except Teacher.DoesNotExist:
+            return JsonResponse({'state': 'failed', 'data': '教师不存在'})
+        else:
+            try:
+                target = Course.objects.get(cid=request.params['cid'])
+            except Course.DoesNotExist:
+                try:
+                    Course.objects.create(name=request.params['name'], cid=request.params['cid'], credit=request.params['credit'],
+                                          term=term.current, depart=teacher.depart, keys_tid=teacher)
+                except:
+                    return JsonResponse({'state': 'failed', 'data': '无法插入表项'})
+                else:
+                    return JsonResponse({'state': 'ok', 'data': '课程申请已提交'})
+            else:
+                return JsonResponse({'state': 'failed', 'data': '课号已存在'})
+
+
+def get_ApplyCourse(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT C.id id, C.cid cid, C.name name, C.credit credit, C.term term, C.accept accept from course_course C JOIN teacher_teacher T ON C.keys_tid_id = T.id WHERE T.id = %s and  C.term in (SELECT current FROM currentTerm_currentterm CT WHERE CT.id = 1)", [request.params['id']])
+            ret = list(dictfetchall(cursor))
+            return JsonResponse({'list': ret})
+
+
+def delete_ApplyCourse(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        try:
+            target = Course.objects.get(id=request.params['id'])
+        except Course.DoesNotExist:
+            return JsonResponse({'state': 'failed', 'data': '课程不存在'})
+        else:
+            target.delete()
+            return JsonResponse({'state': 'ok', 'data': '课程申请已删除'})
+
+
+def get_CourseTerm(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT distinct C.term term from course_course C JOIN teacher_teacher T ON C.keys_tid_id = T.id WHERE T.id = %s and C.accept ORDER BY term DESC", [request.params['id']])
+            ret = list(dictfetchall(cursor))
+            current = CurrentTerm.objects.get(id=1)
+            return JsonResponse({'list': ret, 'current': current.current})

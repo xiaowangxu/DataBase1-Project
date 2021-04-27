@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'teacher.apps.TeacherConfig',
     'course.apps.CourseConfig',
     'election.apps.ElectionConfig',
+    'currentTerm.apps.CurrenttermConfig',
     'corsheaders'
 ]
 

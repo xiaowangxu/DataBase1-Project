@@ -208,10 +208,10 @@
 					sumcredit: 0,
 					avgcredit: 0
 				} : {
-						avg: Math.round(sum * 100 / count) / 100,
-						sumcredit: sumcredit,
-						avgcredit: Math.round(sumcredit * 100 / count) / 100
-					}
+					avg: Math.round(sum * 100 / count) / 100,
+					sumcredit: sumcredit,
+					avgcredit: Math.round(sumcredit * 100 / count) / 100
+				}
 			},
 			get_UnfinishedCourse: function () {
 				return this.courseList.filter((i) => {
@@ -301,7 +301,7 @@
 							}
 						})
 				}
-				else if (tab === '我的课程') {
+				else if (tab === '我的课程' || tab === '成绩单') {
 					this.$axios.post("http://127.0.0.1:8000/students/getCourse/", { id: this.info.id })
 						.then(res => {
 							// console.log(res.data)

@@ -1,5 +1,5 @@
 <template>
-	<div id="app">
+	<div id="app" style="height: 100%;">
 		<!-- <div id="nav">
 			<router-link to="/">Home</router-link> |
 			<router-link to="/about">About</router-link>
@@ -18,7 +18,14 @@
 
 	body {
 		background-color: rgb(93, 167, 252);
-		padding: 60px 100px;
+		position: fixed;
+		padding: 80px 200px;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		box-sizing: content-box;
+		margin: 0px;
 	}
 
 	.el-row {

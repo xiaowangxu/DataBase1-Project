@@ -17,8 +17,8 @@ from django.contrib import admin
 from django.urls import path
 from student.views import get_Students, delete_Students, modify_Student, login_Student, reset_Student, set_Student
 import student.views
-from teacher.views import get_Teacher, reset_Teacher, login_Teacher, delete_Teacher, modify_Teacher, get_Teacher_by_Depart, set_Teacher, get_CourseGrade
-from course.views import get_Course, delete_Course, get_Course_by_Depart, get_Course_by_Student, modify_Course, get_Course_by_Teacher
+from teacher.views import get_Teacher, reset_Teacher, login_Teacher, delete_Teacher, modify_Teacher, get_Teacher_by_Depart, set_Teacher, get_CourseGrade, apply_Course, get_ApplyCourse, delete_ApplyCourse, get_CourseTerm
+from course.views import get_Course, delete_Course, get_Course_by_Depart, get_Course_by_Student, modify_Course, get_Course_by_Teacher, get_By_Course, delete_Election
 from election.views import elect, update
 
 urlpatterns = [
@@ -32,6 +32,7 @@ urlpatterns = [
     path('students/resetPassword/', reset_Student),
     path('students/setPassword/', set_Student),
     path('students/getCourse/', student.views.get_Course),
+    path('students/getByCourse/', get_By_Course),
 
     # Teacher
     path('teacher/', get_Teacher),
@@ -44,6 +45,10 @@ urlpatterns = [
     path('teacher/setPassword/', set_Teacher),
     path('teacher/resetPassword/', reset_Teacher),
     path('teacher/updateGrade/', update),
+    path('teacher/applyCourse/', apply_Course),
+    path('teacher/getApplyCourse/', get_ApplyCourse),
+    path('teacher/deletApplyCourse/', delete_ApplyCourse),
+    path('teacher/getCourseTerm/', get_CourseTerm),
 
     # Course
     path('course/', get_Course),
@@ -51,5 +56,6 @@ urlpatterns = [
     path('course/modify/', modify_Course),
     path('course/getDepart/', get_Course_by_Depart),
     path('course/getStudent/', get_Course_by_Student),
-    path('course/elect/', elect)
+    path('course/elect/', elect),
+    path('course/deleteElect/', delete_Election)
 ]
