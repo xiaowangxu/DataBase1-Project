@@ -33,7 +33,7 @@
 							<template v-for="item in courseList">
 								<div class="coursecard" :key="item.cid"
 									style="flex:1; display: flex; flex-direction: column; padding: 10px 15px"
-									:style="{'background': `linear-gradient(45deg, ${color[item.id**3 % color.length]}, ${color[(item.id**3+1) % color.length]})`}">
+									:style="{'background': `linear-gradient(45deg, ${Color[(item.id) % Color.length][0]}, ${Color[(item.id) % Color.length][1]})`}">
 
 									<div class="container"
 										style="display: flex; flex-direction: row; justify-content: space-between; flex: 1; gap: 20px;">
@@ -56,7 +56,7 @@
 											<div
 												style="width:min-content; background-color: white; padding: 5px 12px 5px 11px; border-radius: 5px; height: min-content;">
 												<a style="font-weight: bolder; font-family: consolas;"
-													:style="{'font-size': '30px', 'font-style': 'italic', 'color': color[(item.id**3+1) % color.length]}">{{Math.round(item.avg*100)/100}}</a>
+													:style="{'font-size': '30px', 'font-style': 'italic', 'color': Color[(item.id) % Color.length][1]}">{{Math.round(item.avg*100)/100}}</a>
 											</div>
 											<div style="display: flex; flex-direction: row; gap: 10px;">
 												<el-button v-if="item.term !== currentTerm" size="small"
@@ -88,8 +88,9 @@
 							icon="el-icon-plus" round @click="applyDialog = true">
 							新建申请
 						</el-button>
-						<div style="flex:1;width: 100%;">
-							<el-table :data="applyCourseList" style="flex:1;width: 100%">
+						<div style="flex:1;width: 100%; margin-right: 10px;">
+							<el-table :data="applyCourseList"
+								style="flex:1;width: 100%; font-weight: bolder; font-size: 16px;">
 								<el-table-column prop="cid" label="课号">
 								</el-table-column>
 								<el-table-column prop="name" label="课名">
@@ -97,6 +98,21 @@
 								<el-table-column prop="term" label="学期">
 								</el-table-column>
 								<el-table-column prop="credit" label="学分">
+								</el-table-column>
+								<el-table-column label="状态">
+									<template slot-scope="scope">
+										<div style="font-size:14px; color: white; font-weight:bolder; border-radius: 16px; height: 32px;width: 100px;display: flex; flex-direction: column; align-items: center; justify-content: center;"
+											:style="{'background': (scope.row.accept === false ? 'linear-gradient(45deg, rgb(221, 7, 25), rgb(233, 116, 20))':
+												(scope.row.accept === true? 
+												'linear-gradient(45deg, rgb(23, 230, 131), rgb(10, 175, 60))' :
+												'linear-gradient(45deg, rgb(238, 181, 23), rgb(255, 139, 6))' 
+													)
+												), 'width': scope.row.accept === null? '32px': '100px'}">
+											<i v-if="scope.row.accept === false" class="el-icon-close" sty>未通过</i>
+											<i v-if="scope.row.accept === true" class="el-icon-check">审核通过</i>
+											<i v-if="scope.row.accept === null" class="el-icon-loading"></i>
+										</div>
+									</template>
 								</el-table-column>
 								<el-table-column label="操作" width="70">
 									<template slot-scope="scope">
@@ -108,22 +124,20 @@
 						</div>
 					</div>
 
-					<el-tab-pane label="账户管理">
-						<div style="padding: 0px 200px 0px 210px;">
-							<el-form :model="passwordForm">
-								<el-form-item prop="old" label="旧密码">
-									<el-input v-model="passwordForm.old"></el-input>
-								</el-form-item>
-								<el-form-item prop="new" label="新密码">
-									<el-input v-model="passwordForm.new"></el-input>
-								</el-form-item>
-							</el-form>
-							<div
-								style="display: flex; margin-top: 20px; flex-direction: row; align-items: center; justify-content: center;">
-								<el-button type="primary" @click="set_Password()" round>重 置 密 码</el-button>
-							</div>
+					<div v-if="currentTab === 'profile'" style="padding: 10px;">
+						<el-form :model="passwordForm">
+							<el-form-item prop="old" label="旧密码">
+								<el-input v-model="passwordForm.old"></el-input>
+							</el-form-item>
+							<el-form-item prop="new" label="新密码">
+								<el-input v-model="passwordForm.new"></el-input>
+							</el-form-item>
+						</el-form>
+						<div
+							style="display: flex; margin-top: 20px; flex-direction: row; align-items: center; justify-content: center;">
+							<el-button type="primary" @click="set_Password()" round>重置密码</el-button>
 						</div>
-					</el-tab-pane>
+					</div>
 				</div>
 
 				<!-- </el-card> -->
@@ -145,6 +159,9 @@
 			</div>
 			<div class="tabs" :class="{'selected': currentTab==='apply'}" @click="currentTab ='apply'">
 				<a style="margin: auto; line-height: 12px;">开课</a>
+			</div>
+			<div class="tabs" :class="{'selected': currentTab==='query'}" @click="currentTab ='query'">
+				<a style="margin: auto; line-height: 12px;">查询</a>
 			</div>
 			<div class="tabs" :class="{'selected': currentTab==='profile'}" @click="currentTab ='profile'">
 				<a style="margin: auto; line-height: 12px;">账户</a>
@@ -217,7 +234,22 @@
 				courseList: [],
 				termList: [],
 				applyCourseList: [],
-				color: ['#9b1645', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#59662c', '#9fa328', '#ffdd00', '#ff9800', '#ff5722'],
+				color: ['#009688', '#59662c', '#9fa328', '#ffdd00', '#ff9800', '#ff5722'],
+				Color: [
+					['#9b1645', '#e91e63'],
+					['#e91e63', '#9c27b0'],
+					['#3f51b5', '#2196f3'],
+					['#009688', '#59662c'],
+					['#673ab7', '#3f51b5'],
+					['#ffdd11', '#ff9800'],
+					['#00bcd4', '#009688'],
+					['#ff9800', '#ff5722'],
+					['#9c27b0', '#673ab7'],
+					['#59662c', '#9fa328'],
+					['#2196f3', '#00bcd4'],
+					['#9fa328', '#ffdd11'],
+					['#a32866', '#f44336']
+				]
 			}
 		},
 		watch: {
@@ -336,8 +368,8 @@
 			gradeinput(item) {
 				// console.log(item)
 				this.gradeinput_course = {
-					color1: this.color[(item.id ** 3) % this.color.length],
-					color2: this.color[(item.id ** 3 + 1) % this.color.length],
+					color1: this.Color[(item.id) % this.Color.length][0],
+					color2: this.Color[(item.id) % this.Color.length][1],
 					id: item.id,
 					readonly: item.term !== this.currentTerm,
 					info: item
@@ -396,7 +428,7 @@
 								message: res.data.data,
 								showClose: true
 							});
-							this.load_Courses()
+							this.load_Applications()
 						}
 					})
 
@@ -475,7 +507,7 @@
 		user-select: none;
 		flex-direction: column;
 		align-content: center;
-		color: rgb(247, 38, 101);
+		color: rgb(5, 47, 182);
 		box-shadow: rgba(63, 106, 226, 0.26) 0px 5px 7px 0px;
 		background: linear-gradient(45deg, rgb(255, 255, 255), rgb(255, 255, 255));
 		transform: scale(1) translateX(0px);
@@ -483,27 +515,27 @@
 	}
 
 	.tabs.selected {
-		background: linear-gradient(45deg, rgb(207, 43, 133), rgb(247, 139, 38));
-		box-shadow: #9b510c54 0px 5px 7px 0px;
+		background: linear-gradient(45deg, rgb(36, 111, 250), rgb(5, 47, 182));
+		box-shadow: #406a8654 0px 5px 7px 0px;
 		color: white;
 		transform: scale(1) translateY(0px);
 		transition: all .2s ease-out;
 	}
 
 	.tabs.selected:hover {
-		background: linear-gradient(45deg, rgb(207, 43, 133), rgb(247, 139, 38));
-		box-shadow: #9b510c54 0px 5px 7px 0px;
+		background: linear-gradient(45deg, rgb(36, 111, 250), rgb(5, 47, 182));
+		box-shadow: #24567754 0px 3px 3px 0px;
 		color: white;
-		transform: scale(1) translateY(0px);
+		transform: scale(0.96) translateY(1px);
 		transition: all .1s ease-out;
 	}
 
 	.tabs.selected:active {
-		background: linear-gradient(45deg, rgb(207, 43, 133), rgb(247, 139, 38));
-		box-shadow: #9b510c54 0px 5px 7px 0px;
+		background: linear-gradient(45deg, rgb(36, 111, 250), rgb(5, 47, 182));
+		box-shadow: #406a8654 0px 1px 2px 0px;
 		color: white;
-		transform: scale(1) translateY(0px);
-		transition: all .1s ease-out;
+		transform: scale(0.94) translateY(2px);
+		transition: all .2s ease-out;
 	}
 
 	.tabs:hover {
@@ -513,7 +545,7 @@
 	}
 
 	.tabs:active {
-		box-shadow: #9b510c54 0px 2px 6px 0px;
+		box-shadow: #0c269b54 0px 2px 6px 0px;
 		transform: scale(0.95) translateY(1px);
 		transition: all .1s ease-out;
 	}

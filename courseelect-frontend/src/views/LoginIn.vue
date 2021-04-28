@@ -1,6 +1,7 @@
 <template>
-	<div style="width: 300px; margin: auto;">
-		<el-card>
+	<div style="width: 100%; height: 100%; display: flex; flex-direction: column;justify-content: center;
+    align-items: center;">
+		<el-card style="width: 300px; ">
 			<div style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
 				<el-radio-group v-model="type">
 					<el-radio-button label="学生"></el-radio-button>

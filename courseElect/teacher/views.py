@@ -185,8 +185,12 @@ def delete_ApplyCourse(request):
         except Course.DoesNotExist:
             return JsonResponse({'state': 'failed', 'data': '课程不存在'})
         else:
-            target.delete()
-            return JsonResponse({'state': 'ok', 'data': '课程申请已删除'})
+            try:
+                target.delete()
+            except:
+                return JsonResponse({'state': 'failed', 'data': '课程无法删除'})
+            else:
+                return JsonResponse({'state': 'ok', 'data': '课程申请已删除'})
 
 
 def get_CourseTerm(request):

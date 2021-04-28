@@ -49,7 +49,8 @@
 		<div v-if="readonly"
 			style="flex: 1; width: 100%; display: flex; flex-direction: row; gap: 20px; max-height: 100%; height: 100px;">
 
-			<el-table :data="studentList" style="width: 100%; flex:1; overflow-y: auto; font-weight: bolder;"
+			<el-table :data="studentList"
+				style="width: 100%; flex:1; overflow-y: auto; font-weight: bolder; font-size: 16px;"
 				:default-sort="{prop:'sid', order:'ascending'}">
 				<el-table-column prop="sid" label="学号" sortable>
 				</el-table-column>
@@ -63,7 +64,8 @@
 				<canvas ref="courseChart2"></canvas>
 			</div>
 		</div>
-		<el-table v-else :data="studentList" style="width: 100%; flex:1; overflow-y: auto; font-weight: bolder;"
+		<el-table v-else :data="studentList"
+			style="width: 100%; flex:1; overflow-y: auto; font-weight: bolder; font-size: 16px;"
 			:default-sort="{prop:'sid', order:'ascending'}">
 			<el-table-column prop="sid" label="学号" sortable>
 			</el-table-column>
@@ -333,7 +335,7 @@
 				let list = this.studentList.filter((i, idx) => {
 					return i.grade !== this.studentListOld[idx]
 				}).map((i) => {
-					return { id: i.euid, grade: Math.max(Math.min(100, i.grade)) }
+					return { id: i.euid, grade: i.grade === '' ? '' : Math.max(Math.min(100, i.grade)) }
 				})
 				console.log(list)
 				if (list.length <= 0) return
@@ -423,40 +425,40 @@
 		},
 		mounted() {
 			this.info = JSON.parse(localStorage.login)
-			this.chart2 = new Chart(this.$refs.courseChart2, {
-				type: 'line',
-				data: {
-					labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-					datasets: [{
-						label: '# of Votes',
-						data: [12, 19, 3, 5, 2, 3],
-						backgroundColor: [
-							this.colors.color2,
-							this.colors.color2,
-							this.colors.color2,
-							'rgba(75, 192, 192, 0.2)',
-							'rgba(153, 102, 255, 0.2)',
-							'rgba(255, 159, 64, 0.2)'
-						],
-						borderColor: [
-							this.colors.color1,
-							'rgba(54, 162, 235, 1)',
-							'rgba(255, 206, 86, 1)',
-							'rgba(75, 192, 192, 1)',
-							'rgba(153, 102, 255, 1)',
-							'rgba(255, 159, 64, 1)'
-						],
-						borderWidth: 1
-					}]
-				},
-				options: {
-					scales: {
-						y: {
-							beginAtZero: true
-						}
-					}
-				}
-			})
+			// this.chart2 = new Chart(this.$refs.courseChart2, {
+			// 	type: 'line',
+			// 	data: {
+			// 		labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+			// 		datasets: [{
+			// 			label: '# of Votes',
+			// 			data: [12, 19, 3, 5, 2, 3],
+			// 			backgroundColor: [
+			// 				this.colors.color2,
+			// 				this.colors.color2,
+			// 				this.colors.color2,
+			// 				'rgba(75, 192, 192, 0.2)',
+			// 				'rgba(153, 102, 255, 0.2)',
+			// 				'rgba(255, 159, 64, 0.2)'
+			// 			],
+			// 			borderColor: [
+			// 				this.colors.color1,
+			// 				'rgba(54, 162, 235, 1)',
+			// 				'rgba(255, 206, 86, 1)',
+			// 				'rgba(75, 192, 192, 1)',
+			// 				'rgba(153, 102, 255, 1)',
+			// 				'rgba(255, 159, 64, 1)'
+			// 			],
+			// 			borderWidth: 1
+			// 		}]
+			// 	},
+			// 	options: {
+			// 		scales: {
+			// 			y: {
+			// 				beginAtZero: true
+			// 			}
+			// 		}
+			// 	}
+			// })
 			this.switch_Course(this.id)
 		}
 	}
