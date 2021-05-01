@@ -54,7 +54,7 @@
 										<div class="container"
 											style="justify-content: center; flex: unset; flex-direction: column; gap: 13px; align-items: flex-end; padding-top: 5px; justify-content: space-between;">
 											<div
-												style="width:min-content; background-color: white; padding: 5px 12px 5px 11px; border-radius: 5px; height: min-content;">
+												style="background-color: white; padding: 5px 12px 5px 11px; border-radius: 5px; height: min-content;">
 												<a style="font-weight: bolder; font-family: consolas;"
 													:style="{'font-size': '30px', 'font-style': 'italic', 'color': Color[(item.id) % Color.length][1]}">{{Math.round(item.avg*100)/100}}</a>
 											</div>
@@ -234,7 +234,6 @@
 				courseList: [],
 				termList: [],
 				applyCourseList: [],
-				color: ['#009688', '#59662c', '#9fa328', '#ffdd00', '#ff9800', '#ff5722'],
 				Color: [
 					['#9b1645', '#e91e63'],
 					['#e91e63', '#9c27b0'],
@@ -562,10 +561,5 @@
 		box-shadow: #00000041 0px 10px 12px 0px;
 		transform: scale(1.01) translateY(-2px);
 		transition: all .2s ease-out;
-	}
-
-	.el-tabs__header.is-left {
-		position: sticky;
-		top: 0;
 	}
 </style>

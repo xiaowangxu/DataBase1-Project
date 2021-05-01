@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
 from student.models import Student
+from currentTerm.models import CurrentTerm
 from django.core.paginator import Paginator
 from django.db.utils import IntegrityError
 from django.db.models.deletion import ProtectedError
@@ -91,7 +92,7 @@ def get_Course(request):
         request.params = json.loads(request.body)
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT C.id, C.cid, C.name cname, C.depart, C.credit, E.grade, T.id tuid, T.tid, T.name tname FROM election_election E JOIN student_student S on E.sid_id = S.id JOIN course_course C on C.id = E.cid_id JOIN teacher_teacher T on T.id = C.keys_tid_id WHERE S.id = %s", [request.params['id']])
+                "SELECT C.id, C.cid, C.name cname, C.depart, C.credit, E.grade, T.id tuid, T.tid, T.name tname, C.term term FROM election_election E JOIN student_student S on E.sid_id = S.id JOIN course_course C on C.id = E.cid_id JOIN teacher_teacher T on T.id = C.keys_tid_id WHERE S.id = %s and C.term = %s", [request.params['id'], request.params['term']])
             ret = list(dictfetchall(cursor))
             return JsonResponse({'list': ret})
 
@@ -130,3 +131,24 @@ def set_Student(request):
                 return JsonResponse({'state': 'failed', 'data': '无法修改'})
             else:
                 return JsonResponse({'state': 'ok', 'data': '已修改密码'})
+
+
+def get_CourseTerm(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT distinct C.term term from course_course C JOIN election_election E ON E.cid_id=C.id WHERE E.sid_id= %s ORDER BY term DESC", [
+                           request.params['id']])
+            ret = list(dictfetchall(cursor))
+            current = CurrentTerm.objects.get(id=1)
+            return JsonResponse({'list': ret, 'current': current.current})
+
+
+def get_GPAs(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT term term, avg(grade) avg, sum(jd * credit)/sum(credit) gpa FROM (SELECT C.term, E.grade, (CASE WHEN grade >= 90 THEN 4.0 WHEN grade >=85 THEN 3.7 WHEN grade >=83 THEN 3.3 WHEN grade >=78 THEN 3.0 WHEN grade >=75 THEN 2.7 WHEN grade >=72 THEN 2.3 WHEN grade >=68 THEN 2.0 WHEN grade >=64 THEN 1.7 WHEN grade >=60 THEN 1.0 ELSE 0.0 END ) as jd, C.credit FROM election_election E JOIN course_course C on E.cid_id = C.id WHERE E.sid_id = %s and C.term not in (SELECT current from currentTerm_currentterm)) GROUP BY term ORDER BY term DESC", [request.params['id']])
+            ret = list(dictfetchall(cursor))
+            return JsonResponse({'list': ret})

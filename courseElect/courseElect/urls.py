@@ -33,6 +33,8 @@ urlpatterns = [
     path('students/setPassword/', set_Student),
     path('students/getCourse/', student.views.get_Course),
     path('students/getByCourse/', get_By_Course),
+    path('students/getCourseTerm/', student.views.get_CourseTerm),
+    path('students/getGPAs/', student.views.get_GPAs),
 
     # Teacher
     path('teacher/', get_Teacher),
