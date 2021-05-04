@@ -62,7 +62,7 @@
 									tid: res.data.tid
 								})
 								if (res.data.isadmin) {
-									this.$router.push('/studenttable')
+									this.$router.push('/controlhub')
 								}
 								else {
 									this.$router.push('/teacherhub')

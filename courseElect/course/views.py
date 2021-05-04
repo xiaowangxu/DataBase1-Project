@@ -4,8 +4,10 @@ from django.http import JsonResponse
 from course.models import Course
 from teacher.models import Teacher
 from student.models import Student
+from currentTerm.models import CurrentTerm
 from election.models import Election
 from django.db.models.deletion import ProtectedError
+from django.core.paginator import Paginator
 import json
 
 # Create your views here.
@@ -35,6 +37,42 @@ def get_Course(request):
             "SELECT c.id id, c.name name, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id")
         ret = list(dictfetchall(cursor))
         return JsonResponse({'list': ret})
+
+
+def get_Appliction_Paged(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT c.id id, c.name name, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id WHERE C.accept is NULL ORDER BY term DESC, cid")
+            qs = list(dictfetchall(cursor))
+            p = Paginator(qs, 12)
+            pageidx = min(request.params["page"], p.num_pages)
+            retStr = list(p.page(pageidx).object_list)
+            return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})
+
+
+def has_Appliction(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT count(C.id) count FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id WHERE C.accept is NULL ORDER BY term DESC, cid")
+            qs = dictfetchall(cursor)[0]['count']
+            return JsonResponse({'has': qs > 0})
+
+
+def get_Course_Paged(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT c.id id, c.name name, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id WHERE C.accept is TRUE ORDER BY term DESC, cid")
+            qs = list(dictfetchall(cursor))
+            p = Paginator(qs, 12)
+            pageidx = min(request.params["page"], p.num_pages)
+            retStr = list(p.page(pageidx).object_list)
+            return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})
 
 
 def delete_Course(request):
@@ -70,13 +108,17 @@ def get_Course_by_Student(request):
         except Student.DoesNotExist:
             return JsonResponse({'state': 'failed', 'data': '学生不存在'})
         else:
+            ret = []
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT C.id id, C.name name, C.cid cid, C.credit credit, C.depart depart, T.name tname, T.id tuid, T.tid tid FROM course_course C JOIN teacher_teacher T on C.keys_tid_id = T.id WHERE C.depart = %s and C.id not in (SELECT cid_id FROM election_election WHERE sid_id = %s and grade is not NULL)", [s.depart, s.id])
+                    "SELECT C.id id, C.name name, C.cid cid, C.credit credit, C.depart depart, T.name tname, T.id tuid, T.tid tid FROM course_course C JOIN teacher_teacher T on C.keys_tid_id = T.id WHERE C.depart = %s and C.id not in (SELECT cid_id FROM election_election WHERE sid_id = %s and grade is not NULL) and c.term in (SELECT current FROM currentTerm_currentterm)", [s.depart, s.id])
                 ret = list(dictfetchall(cursor))
-                li = Election.objects.values()
-                li = li.filter(sid=s.id, grade=None)
-                return JsonResponse({'list': ret, 'elected': list(li)})
+            ret2 = []
+            with connection.cursor() as cursor2:
+                cursor2.execute(
+                    "SELECT C.id cuid, cid, name, credit, depart, term FROM election_election E JOIN course_course C ON E.cid_id = C.id WHERE E.sid_id = %s and E.grade IS NULL and C.depart = %s and C.term in (SELECT current FROM currentTerm_currentterm)", [s.id, s.depart])
+                ret2 = list(dictfetchall(cursor2))
+                return JsonResponse({'list': ret, 'elected': ret2})
 
 
 def get_Course_by_Teacher(request):
@@ -118,6 +160,23 @@ def modify_Course(request):
                     return JsonResponse({'state': 'failed', 'data': '无法修改'})
                 else:
                     return JsonResponse({'state': 'ok', 'data': '修改完成'})
+
+
+def modify_Application(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        try:
+            target = Course.objects.get(id=request.params['id'])
+        except Teacher.DoesNotExist:
+            return JsonResponse({'state': 'failed', 'data': '课程不存在'})
+        else:
+            target.accept = request.params['accept']
+            try:
+                target.save()
+            except:
+                return JsonResponse({'state': 'failed', 'data': '无法修改'})
+            else:
+                return JsonResponse({'state': 'ok', 'data': '修改完成'})
 
 
 def get_By_Course(request):

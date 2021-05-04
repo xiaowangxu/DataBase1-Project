@@ -8,6 +8,7 @@ from django.db.utils import IntegrityError
 from django.db.models.deletion import ProtectedError
 from django.db import connection
 import json
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -25,6 +26,16 @@ def get_Students(request):
             return JsonResponse({'state': 'ok', 'data': '已添加'})
     retStr = list(qs)
     return JsonResponse({'list': retStr})
+
+
+def get_Students_Paged(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        qs = Student.objects.values()
+        p = Paginator(qs, 12)
+        pageidx = min(request.params["page"], p.num_pages)
+        retStr = list(p.page(pageidx).object_list)
+        return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})
 
 
 def login_Student(request):

@@ -14,9 +14,9 @@
 		</div>
 
 		<div
-			style="background-color: white; flex:1; position: fixed; top: 140px; left: 280px; right: 200px; bottom: 80px; border-radius: 10px; box-shadow: rgb(0 0 0 / 7%) 0px 5px 9px 9px; overflow: hidden; display: flex; flex-direction: row;">
+			style="background-color: white; flex:1; position: fixed; top: 140px; left: 300px; right: 200px; bottom: 80px; border-radius: 10px; box-shadow: rgb(0 0 0 / 7%) 0px 5px 9px 9px; overflow: hidden; display: flex; flex-direction: row;">
 			<div style="margin: 12px; position: absolute; top: 0; right: 0; bottom: 0; left: 0; flex: 1; overflow: hidden;"
-				tabPosition="left" @tab-click="on_Tab_changed($event.label)">
+				tabPosition="left">
 
 				<div v-if="currentTab === 'courses'"
 					style="display: flex; flex-direction: column; gap: 12px; overflow: visible; height: 100%;">
@@ -124,33 +124,64 @@
 
 				</div>
 
-				<div v-if="currentTab === 'profile'" style="padding: 10px;">
-					<el-form :model="passwordForm">
-						<el-form-item prop="old" label="旧密码">
-							<el-input v-model="passwordForm.old"></el-input>
-						</el-form-item>
-						<el-form-item prop="new" label="新密码">
-							<el-input v-model="passwordForm.new"></el-input>
-						</el-form-item>
-					</el-form>
+				<div v-if="currentTab === 'elect'"
+					style="padding: 10px 10px 6px 10px; height: 100%; box-sizing: border-box; overflow: auto;">
 					<div
-						style="display: flex; margin-top: 20px; flex-direction: row; align-items: center; justify-content: center;">
-						<el-button type="primary" @click="set_Password()" round>重置密码</el-button>
+						style="display: flex; flex-direction: column; gap: 20px; overflow: visible; align-items: center; font-size: 20px;">
+						<el-transfer v-model="elect" :button-texts="['退课', '选课']" :titles="['可选', '已选']"
+							:data="options">
+							<div slot="right-footer"
+								style="width: 100%; height: 100%;display: flex; align-items: center; justify-content: center;">
+
+								<a
+									style="text-align: center; font-size: 16px; color: #303133; font-weight: 400;">已选学分：{{get_SumCredit}}</a>
+
+							</div>
+						</el-transfer>
+					</div>
+					<div style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+						<el-button type="primary" @click="elect_Confirm()" round :disabled="!can_Elect">选</el-button>
+					</div>
+				</div>
+
+				<div v-if="currentTab === 'profile'" style="height: 100%; overflow: auto;">
+					<div
+						style="width: 100%; flex: 1; display: flex; flex-direction: row; flex-wrap: wrap; overflow: auto; gap: 10px; padding: 30px; box-sizing: border-box; align-items: flex-start;align-content: flex-start;">
+						<div class="card"
+							style="width: 200px; background-color: white; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; gap: 10px;">
+							<h2 style="margin: 0px;">🚦 修改密码</h2>
+							<el-form :model="passwordForm">
+								<el-form-item prop="old" label="旧密码">
+									<el-input v-model="passwordForm.old"></el-input>
+								</el-form-item>
+								<el-form-item prop="new" label="新密码">
+									<el-input v-model="passwordForm.new"></el-input>
+								</el-form-item>
+							</el-form>
+							<div
+								style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+								<el-button type="primary" @click="set_Password()" round>重置密码</el-button>
+							</div>
+						</div>
+
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<div
-			style="position: fixed; left: 180px; width: 80px; top: 150px; display: flex; flex-direction: column; gap: 10px;">
+			style="position: fixed; left: 180px; width: 100px; top: 150px; display: flex; flex-direction: column; gap: 10px;">
 			<div class="tabs" :class="{'selected': currentTab==='courses'}" @click="currentTab ='courses'">
-				<a style="margin: auto; line-height: 12px;">课程</a>
+				<a style="margin: auto; line-height: 12px;">🏢 课程</a>
 			</div>
 			<div class="tabs" :class="{'selected': currentTab==='grade'}" @click="currentTab ='grade'">
-				<a style="margin: auto; line-height: 12px;">成绩</a>
+				<a style="margin: auto; line-height: 12px;">🥇成绩</a>
+			</div>
+			<div class="tabs" :class="{'selected': currentTab==='elect'}" @click="currentTab ='elect'">
+				<a style="margin: auto; line-height: 12px;">🧮 选课</a>
 			</div>
 			<div class="tabs" :class="{'selected': currentTab==='profile'}" @click="currentTab ='profile'">
-				<a style="margin: auto; line-height: 12px;">账户</a>
+				<a style="margin: auto; line-height: 12px;">👓 账户</a>
 			</div>
 		</div>
 
@@ -282,6 +313,16 @@
 				})
 			}
 		},
+		watch: {
+			currentTab(newval) {
+				if (newval === 'elect') {
+					this.load_ElectCourses()
+				}
+				else if (newval === 'courses') {
+					this.load_Courses()
+				}
+			}
+		},
 		methods: {
 			load_Courses() {
 				this.$axios.post("http://127.0.0.1:8000/students/getCourseTerm/", { id: this.info.id })
@@ -401,7 +442,7 @@
 								})
 							}
 						}
-						this.on_Tab_changed('选课')
+						this.load_ElectCourses();
 					})
 			},
 			set_Password() {
@@ -422,60 +463,30 @@
 						}
 					})
 			},
-			on_Tab_changed(tab) {
-				if (tab === '选课') {
-					this.$axios.post("http://127.0.0.1:8000/course/getStudent/", { id: this.info.id })
-						.then(res => {
-							// console.log(res.data)
-							if (res.data.state === 'failed') {
-								this.$message.error({
-									message: res.data.data,
-									showClose: true
-								});
-							}
-							else {
-								this.creditmap = {}
-								this.options = res.data.list.map((i) => {
-									this.creditmap[i.id] = i.credit
-									return { label: `${i.cid} ${i.name} 教师：${i.tid} ${i.tname} 学分：${i.credit}`, key: i.id, credit: i.credit }
-								})
-								this.elect = res.data.elected.map((i) => {
-									return i.cid_id
-								})
-								this.haselected = res.data.elected.map((i) => {
-									return i.cid_id
-								})
-							}
-						})
-				}
-				else if (tab === '我的课程' || tab === '成绩单') {
-					this.$axios.post("http://127.0.0.1:8000/students/getCourse/", { id: this.info.id })
-						.then(res => {
-							// console.log(res.data)
-							if (res.data.state === 'failed') {
-								this.$message.error({
-									message: res.data.data,
-									showClose: true
-								});
-							}
-							else {
-								this.courseList = res.data.list
-								let label = []
-								let data = []
-								let color = []
-								this.courseList.filter(i => i.grade !== null).forEach(i => {
-									label.push(i.cname)
-									data.push(i.grade)
-									color.push(this.color[i.id % this.color.length])
-								})
-								this.chartdata.labels = label
-								this.chartdata.datasets[0].data = data
-								this.chartdata.datasets[0].borderColor = color
-								this.chartdata.datasets[0].backgroundColor = color
-								this.canvas.update()
-							}
-						})
-				}
+			load_ElectCourses() {
+				this.$axios.post("http://127.0.0.1:8000/course/getStudent/", { id: this.info.id })
+					.then(res => {
+						console.log(res.data)
+						if (res.data.state === 'failed') {
+							this.$message.error({
+								message: res.data.data,
+								showClose: true
+							});
+						}
+						else {
+							this.creditmap = {}
+							this.options = res.data.list.map((i) => {
+								this.creditmap[i.id] = i.credit
+								return { label: `${i.cid} ${i.name} 教师：${i.tid} ${i.tname} 学分：${i.credit}`, key: i.id, credit: i.credit }
+							})
+							this.elect = res.data.elected.map((i) => {
+								return i.cuid
+							})
+							this.haselected = res.data.elected.map((i) => {
+								return i.cuid
+							})
+						}
+					})
 			},
 			get_GPA(i) {
 				if (i < 60) return 0
@@ -567,7 +578,7 @@
 	}
 
 	.tabs {
-		padding: 12px 0px;
+		padding: 14px 0px;
 		border-radius: 6px;
 		display: flex;
 		user-select: none;
@@ -626,6 +637,20 @@
 	.coursecard:hover {
 		border-radius: 10px;
 		box-shadow: #00000041 0px 10px 12px 0px;
+		transform: scale(1.01) translateY(-2px);
+		transition: all .2s ease-out;
+	}
+
+	.card {
+		border-radius: 10px;
+		box-shadow: #00000026 0px 2px 7px 0px;
+		transform: scale(1) translateY(0px);
+		transition: all .2s ease-out;
+	}
+
+	.card:hover {
+		border-radius: 10px;
+		box-shadow: #00000041 0px 4px 12px 0px;
 		transform: scale(1.01) translateY(-2px);
 		transition: all .2s ease-out;
 	}

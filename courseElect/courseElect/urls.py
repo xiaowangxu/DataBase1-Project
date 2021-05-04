@@ -17,8 +17,8 @@ from django.contrib import admin
 from django.urls import path
 from student.views import get_Students, delete_Students, modify_Student, login_Student, reset_Student, set_Student
 import student.views
-from teacher.views import get_Teacher, reset_Teacher, login_Teacher, delete_Teacher, modify_Teacher, get_Teacher_by_Depart, set_Teacher, get_CourseGrade, apply_Course, get_ApplyCourse, delete_ApplyCourse, get_CourseTerm
-from course.views import get_Course, delete_Course, get_Course_by_Depart, get_Course_by_Student, modify_Course, get_Course_by_Teacher, get_By_Course, delete_Election
+from teacher.views import get_Teacher, reset_Teacher, login_Teacher, delete_Teacher, modify_Teacher, get_Teacher_by_Depart, set_Teacher, get_CourseGrade, apply_Course, get_ApplyCourse, delete_ApplyCourse, get_CourseTerm, get_Teachers_Paged
+from course.views import get_Course, delete_Course, get_Course_by_Depart, get_Course_by_Student, modify_Course, get_Course_by_Teacher, get_By_Course, delete_Election, get_Course_Paged, get_Appliction_Paged, modify_Application, has_Appliction
 from election.views import elect, update
 
 urlpatterns = [
@@ -26,6 +26,7 @@ urlpatterns = [
 
     # Student
     path('students/', get_Students),
+    path('students/paged/', student.views.get_Students_Paged),
     path('students/delete/', delete_Students),
     path('students/login/', login_Student),
     path('students/modify/', modify_Student),
@@ -38,6 +39,7 @@ urlpatterns = [
 
     # Teacher
     path('teacher/', get_Teacher),
+    path('teacher/paged/', get_Teachers_Paged),
     path('teacher/delete/', delete_Teacher),
     path('teacher/login/', login_Teacher),
     path('teacher/modify/', modify_Teacher),
@@ -54,6 +56,10 @@ urlpatterns = [
 
     # Course
     path('course/', get_Course),
+    path('course/paged/', get_Course_Paged),
+    path('course/application/paged/', get_Appliction_Paged),
+    path('course/application/modify/', modify_Application),
+    path('course/application/has/', has_Appliction),
     path('course/delete/', delete_Course),
     path('course/modify/', modify_Course),
     path('course/getDepart/', get_Course_by_Depart),

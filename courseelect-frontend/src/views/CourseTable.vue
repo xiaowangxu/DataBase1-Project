@@ -1,7 +1,6 @@
 <template>
-	<div id="coursetable">
-		<div
-			style="width: 100%; display: flex; flex-direction: row; margin-bottom: 10px; align-items: center; box-sizing: border-box;">
+	<div style="width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px;">
+		<div style="width: 100%; display: flex; flex-direction: row; align-items: center; box-sizing: border-box;">
 			<el-select value="/coursetable" placeholder="请选择" @change="switch_Page($event)">
 				<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
 				</el-option>
@@ -10,40 +9,54 @@
 			<el-button size="medium" icon="el-icon-refresh-left" circle @click="refresh_CourseList()"></el-button>
 			<el-button type="success" size="medium" icon="el-icon-plus" round @click="addDialog = true">添加</el-button>
 			<div style="flex:1"></div>
-			<el-button type="danger" size="medium" icon="el-icon-top-left" round @click="logout()">登出</el-button>
+			<!-- <el-button type="danger" size="medium" icon="el-icon-top-left" round @click="logout()">登出</el-button> -->
 		</div>
-		<div style="display: flex; flex-direction: row; gap: 20px">
+		<div style="flex: 1; display: flex; flex-direction: row; box-sizing: border-box;">
+			<div
+				style="width: 60%; height: 100%; display: flex; flex-direction: column; gap: 10px; margin-right: 20px;">
+				<div
+					style="background-color: white; flex: 1; padding: 14px 20px 20px 20px; border-radius: 10px; box-shadow: rgb(0 0 0 / 7%) 0px 5px 9px 9px; box-sizing: border-box;">
+					<el-table :data=" list" style="width: 100%; height: 100%; font-size: 16px;">
+						<el-table-column prop="cid" label="课号">
+						</el-table-column>
+						<el-table-column prop="term" label="学期">
+						</el-table-column>
+						<el-table-column prop="name" label="课名">
+						</el-table-column>
+						<el-table-column prop="credit" label="学分">
+						</el-table-column>
+						<el-table-column prop="tid" label="工号">
+						</el-table-column>
+						<el-table-column prop="tname" label="教师">
+						</el-table-column>
+						<el-table-column prop="depart" label="学院">
+						</el-table-column>
+						<el-table-column label="操作" width="140">
+							<template slot-scope="scope">
+								<el-button @click="open_modify_Course(scope.row)" type="primary" size="small"
+									icon="el-icon-edit" circle></el-button>
+								<el-button @click="delete_Course(scope.row)" type="danger" size="small"
+									icon="el-icon-delete" circle></el-button>
+								<el-button @click="get_Student(scope.row)" type="warning" size="small"
+									icon="el-icon-more" circle></el-button>
+							</template>
+						</el-table-column>
+					</el-table>
 
-			<el-card style="flex: 2;">
-				<el-table height="500" :data=" list" style="width: 100%">
-					<el-table-column prop="cid" label="课号">
-					</el-table-column>
-					<el-table-column prop="name" label="课名">
-					</el-table-column>
-					<el-table-column prop="credit" label="学分">
-					</el-table-column>
-					<el-table-column prop="tid" label="工号">
-					</el-table-column>
-					<el-table-column prop="tname" label="教师">
-					</el-table-column>
-					<el-table-column prop="depart" label="学院">
-					</el-table-column>
-					<el-table-column label="操作" width="140">
-						<template slot-scope="scope">
-							<el-button @click="open_modify_Course(scope.row)" type="primary" size="small"
-								icon="el-icon-edit" circle></el-button>
-							<el-button @click="delete_Course(scope.row)" type="danger" size="small"
-								icon="el-icon-delete" circle></el-button>
-							<el-button @click="get_Student(scope.row)" type="warning" size="small" icon="el-icon-more"
-								circle></el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-			</el-card>
-			<div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
-				<h1 style="margin: 0px; color: white;">{{currentCourse}}</h1>
-				<el-card>
-					<el-table height="500" :data="studentslist" style="width: 100%">
+				</div>
+				<div
+					style="width: 100%; background-color: white; border-radius: 10px; padding: 10px 10px; box-sizing: border-box; display: flex; flex-direction: row; justify-content: center; box-shadow: rgb(0 0 0 / 7%) 0px 5px 9px 9px;">
+					<el-pagination background layout="prev, pager, next" :page-count="pagescount"
+						:current-page="currentpage" @current-change="change_Page">
+					</el-pagination>
+				</div>
+			</div>
+			<div style="flex: 1; width: 10px; display: flex; flex-direction: column; gap: 20px;">
+				<h1 style="margin: 20px 0px 0px 0px; color: white; align-self: flex-end; min-height: 43px;">
+					{{currentCourse}}</h1>
+				<div
+					style="background-color: white; flex: 1; padding: 14px 20px 20px 20px; border-radius: 10px; box-shadow: rgb(0 0 0 / 7%) 0px 5px 9px 9px; box-sizing: border-box;">
+					<el-table :data="studentslist" style="width: 100%; height: 100%; font-size: 16px;">
 						<el-table-column prop="sid" label="学号">
 						</el-table-column>
 						<el-table-column prop="name" label="姓名">
@@ -57,7 +70,7 @@
 							</template>
 						</el-table-column>
 					</el-table>
-				</el-card>
+				</div>
 			</div>
 		</div>
 
@@ -134,7 +147,9 @@
 		data() {
 			return {
 				list: [],
-				options: [{ label: '学生', value: '/studenttable' }, { label: '教师', value: '/teachertable' }, { label: '课程', value: '/coursetable' }],
+				currentpage: -1,
+				pagescount: 0,
+				options: [/*{ label: '控制台', value: '/controlhub' },*/ { label: '学生', value: '/studenttable' }, { label: '教师', value: '/teachertable' }, { label: '课程', value: '/coursetable' }, { label: '开课申请', value: '/application' }],
 				depart: [{ label: '计算机科学', value: '计算机科学' }, { label: '智能科学', value: '智能科学' }],
 				addDialog: false,
 				modifyDialog: false,
@@ -155,6 +170,7 @@
 					credit: 1,
 					depart: ''
 				},
+				currentC: undefined,
 				currentCourse: '无选中课程',
 				studentslist: []
 			}
@@ -164,11 +180,18 @@
 				localStorage.login = JSON.stringify({})
 				this.$router.go(-1)
 			},
-			refresh_CourseList() {
-				fetch('http://127.0.0.1:8000/course/')
-					.then(res => res.json())
-					.then(json => {
-						this.list = json.list
+			change_Page(pageidx) {
+				this.refresh_CourseList(pageidx)
+			},
+			refresh_CourseList(page = 1) {
+				this.$axios.post("http://127.0.0.1:8000/course/paged/", { page: page })
+					.then(res => {
+						console.log('res=>', res);
+						this.currentpage = res.data.current
+						this.pagescount = res.data.pages
+						this.list = res.data.list
+					}).then(() => {
+						// this.refresh_StudentList()
 					})
 			},
 			add_Course() {
@@ -213,7 +236,6 @@
 					})
 			},
 			delete_Election(row) {
-				console.log(row)
 				this.$axios.post("http://127.0.0.1:8000/course/deleteElect/", { id: row.eid })
 					.then(res => {
 						console.log('res=>', res);
@@ -230,10 +252,13 @@
 							});
 						}
 					}).then(() => {
-						this.get_Student({ id: row.cid, name: this.currentCourse })
+						this.get_Student()
 					})
 			},
 			get_Student(row) {
+				row = row === undefined ? this.currentC : row
+				this.currentC = row
+
 				this.currentCourse = row.cid + " " + row.name
 				this.$axios.post("http://127.0.0.1:8000/students/getByCourse/", { id: row.id })
 					.then(res => {

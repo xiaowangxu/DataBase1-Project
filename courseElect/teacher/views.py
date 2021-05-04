@@ -28,6 +28,16 @@ def get_Teacher(request):
     return JsonResponse({'list': retStr})
 
 
+def get_Teachers_Paged(request):
+    if (request.method == 'POST'):
+        request.params = json.loads(request.body)
+        qs = Teacher.objects.values()
+        p = Paginator(qs, 12)
+        pageidx = min(request.params["page"], p.num_pages)
+        retStr = list(p.page(pageidx).object_list)
+        return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})
+
+
 def login_Teacher(request):
     if (request.method == 'POST'):
         request.params = json.loads(request.body)

@@ -14,7 +14,7 @@
 		</div>
 
 		<div
-			style="background-color: white; flex:1; position: fixed; top: 140px; left: 280px; right: 200px; bottom: 80px; border-radius: 10px; box-shadow: rgb(0 0 0 / 7%) 0px 5px 9px 9px; overflow: hidden; display: flex; flex-direction: row;">
+			style="background-color: white; flex:1; position: fixed; top: 140px; left: 300px; right: 200px; bottom: 80px; border-radius: 10px; box-shadow: rgb(0 0 0 / 7%) 0px 5px 9px 9px; overflow: hidden; display: flex; flex-direction: row;">
 
 			<transition name="slide-fade2">
 				<div v-if="page==='main'"
@@ -124,18 +124,26 @@
 						</div>
 					</div>
 
-					<div v-if="currentTab === 'profile'" style="padding: 10px;">
-						<el-form :model="passwordForm">
-							<el-form-item prop="old" label="旧密码">
-								<el-input v-model="passwordForm.old"></el-input>
-							</el-form-item>
-							<el-form-item prop="new" label="新密码">
-								<el-input v-model="passwordForm.new"></el-input>
-							</el-form-item>
-						</el-form>
+					<div v-if="currentTab === 'profile'" style="height: 100%; overflow: auto;">
 						<div
-							style="display: flex; margin-top: 20px; flex-direction: row; align-items: center; justify-content: center;">
-							<el-button type="primary" @click="set_Password()" round>重置密码</el-button>
+							style="width: 100%; flex: 1; display: flex; flex-direction: row; flex-wrap: wrap; overflow: auto; gap: 10px; padding: 30px; box-sizing: border-box; align-items: flex-start;align-content: flex-start;">
+							<div class="card"
+								style="width: 200px; background-color: white; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; gap: 10px;">
+								<h2 style="margin: 0px;">🚦 修改密码</h2>
+								<el-form :model="passwordForm">
+									<el-form-item prop="old" label="旧密码">
+										<el-input v-model="passwordForm.old"></el-input>
+									</el-form-item>
+									<el-form-item prop="new" label="新密码">
+										<el-input v-model="passwordForm.new"></el-input>
+									</el-form-item>
+								</el-form>
+								<div
+									style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
+									<el-button type="primary" @click="set_Password()" round>重置密码</el-button>
+								</div>
+							</div>
+
 						</div>
 					</div>
 				</div>
@@ -153,18 +161,18 @@
 		</div>
 
 		<div
-			style="position: fixed; left: 180px; width: 80px; top: 150px; display: flex; flex-direction: column; gap: 10px;">
+			style="position: fixed; left: 180px; width: 100px; top: 150px; display: flex; flex-direction: column; gap: 10px;">
 			<div class="tabs" :class="{'selected': currentTab==='courses'}" @click="currentTab ='courses'">
-				<a style="margin: auto; line-height: 12px;">课程</a>
+				<a style="margin: auto; line-height: 12px;">🏢 课程</a>
 			</div>
 			<div class="tabs" :class="{'selected': currentTab==='apply'}" @click="currentTab ='apply'">
-				<a style="margin: auto; line-height: 12px;">开课</a>
+				<a style="margin: auto; line-height: 12px;">🎯 开课</a>
 			</div>
-			<div class="tabs" :class="{'selected': currentTab==='query'}" @click="currentTab ='query'">
+			<!-- <div class="tabs" :class="{'selected': currentTab==='query'}" @click="currentTab ='query'">
 				<a style="margin: auto; line-height: 12px;">查询</a>
-			</div>
+			</div> -->
 			<div class="tabs" :class="{'selected': currentTab==='profile'}" @click="currentTab ='profile'">
-				<a style="margin: auto; line-height: 12px;">账户</a>
+				<a style="margin: auto; line-height: 12px;">👓 账户</a>
 			</div>
 		</div>
 
@@ -500,7 +508,7 @@
 	}
 
 	.tabs {
-		padding: 12px 0px;
+		padding: 14px 0px;
 		border-radius: 6px;
 		display: flex;
 		user-select: none;
@@ -559,6 +567,20 @@
 	.coursecard:hover {
 		border-radius: 10px;
 		box-shadow: #00000041 0px 10px 12px 0px;
+		transform: scale(1.01) translateY(-2px);
+		transition: all .2s ease-out;
+	}
+
+	.card {
+		border-radius: 10px;
+		box-shadow: #00000026 0px 2px 7px 0px;
+		transform: scale(1) translateY(0px);
+		transition: all .2s ease-out;
+	}
+
+	.card:hover {
+		border-radius: 10px;
+		box-shadow: #00000041 0px 4px 12px 0px;
 		transform: scale(1.01) translateY(-2px);
 		transition: all .2s ease-out;
 	}
