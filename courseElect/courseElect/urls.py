@@ -20,6 +20,7 @@ import student.views
 from teacher.views import get_Teacher, reset_Teacher, login_Teacher, delete_Teacher, modify_Teacher, get_Teacher_by_Depart, set_Teacher, get_CourseGrade, apply_Course, get_ApplyCourse, delete_ApplyCourse, get_CourseTerm, get_Teachers_Paged
 from course.views import get_Course, delete_Course, get_Course_by_Depart, get_Course_by_Student, modify_Course, get_Course_by_Teacher, get_By_Course, delete_Election, get_Course_Paged, get_Appliction_Paged, modify_Application, has_Appliction
 from election.views import elect, update
+from currentTerm.views import next_Term, current_Term
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -65,5 +66,8 @@ urlpatterns = [
     path('course/getDepart/', get_Course_by_Depart),
     path('course/getStudent/', get_Course_by_Student),
     path('course/elect/', elect),
-    path('course/deleteElect/', delete_Election)
+    path('course/deleteElect/', delete_Election),
+
+    path('term/next/', next_Term),
+    path('term/current/', current_Term)
 ]

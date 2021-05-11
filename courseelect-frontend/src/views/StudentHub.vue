@@ -175,7 +175,7 @@
 				<a style="margin: auto; line-height: 12px;">🏢 课程</a>
 			</div>
 			<div class="tabs" :class="{'selected': currentTab==='grade'}" @click="currentTab ='grade'">
-				<a style="margin: auto; line-height: 12px;">🥇成绩</a>
+				<a style="margin: auto; line-height: 12px;">🥇 成绩</a>
 			</div>
 			<div class="tabs" :class="{'selected': currentTab==='elect'}" @click="currentTab ='elect'">
 				<a style="margin: auto; line-height: 12px;">🧮 选课</a>

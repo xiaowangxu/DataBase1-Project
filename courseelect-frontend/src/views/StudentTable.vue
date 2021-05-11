@@ -119,6 +119,7 @@
 				list: [],
 				pagescount: 0,
 				currentpage: 0,
+				currentTerm: '',
 				options: [/*{ label: '控制台', value: '/controlhub' },*/ { label: '学生', value: '/studenttable' }, { label: '教师', value: '/teachertable' }, { label: '课程', value: '/coursetable' }, { label: '开课申请', value: '/application' }],
 				depart: [{ label: '计算机科学', value: '计算机科学' }, { label: '智能科学', value: '智能科学' }],
 				addDialog: false,
@@ -284,6 +285,10 @@
 		},
 		mounted() {
 			this.refresh_StudentList()
+			this.$axios.post("http://127.0.0.1:8000/term/current/", {})
+				.then(res => {
+					this.currentTerm = res.data.current
+				})
 		}
 	}
 </script>

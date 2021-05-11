@@ -8,6 +8,8 @@
 			<div style="flex:1"></div>
 			<el-button size="medium" icon="el-icon-refresh-left" circle @click="refresh_ApplicationList()"></el-button>
 			<div style="flex:1"></div>
+			<el-button size="medium" round disabled>当前学期：{{currentTerm}}
+			</el-button>
 			<!-- <el-button type="danger" size="medium" icon="el-icon-top-left" round @click="logout()">登出</el-button> -->
 		</div>
 		<div
@@ -56,6 +58,7 @@
 		data() {
 			return {
 				list: [],
+				currentTerm: '',
 				pagescount: 0,
 				currentpage: 0,
 				options: [/*{ label: '控制台', value: '/controlhub' },*/ { label: '学生', value: '/studenttable' }, { label: '教师', value: '/teachertable' }, { label: '课程', value: '/coursetable' }, { label: '开课申请', value: '/application' }]
@@ -120,6 +123,10 @@
 		},
 		mounted() {
 			this.refresh_ApplicationList()
+			this.$axios.post("http://127.0.0.1:8000/term/current/", {})
+				.then(res => {
+					this.currentTerm = res.data.current
+				})
 		}
 	}
 </script>

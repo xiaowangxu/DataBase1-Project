@@ -9,6 +9,9 @@
 			<el-button size="medium" icon="el-icon-refresh-left" circle @click="refresh_StudentList()"></el-button>
 			<el-button type="success" size="medium" icon="el-icon-plus" round @click="addDialog = true">添加</el-button> -->
 			<div style="flex:1"></div>
+
+			<el-button size="medium" round disabled>当前学期：{{currentTerm}}
+			</el-button>
 			<el-button type="danger" size="medium" icon="el-icon-top-left" round @click="logout()">登出</el-button>
 		</div>
 		<div
@@ -53,13 +56,13 @@
 			<div class="card"
 				style="width: 200px; background-color: white; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; gap: 10px;">
 				<h2 style="margin: 0px;">🎉 新学期</h2>
-				<el-form>
+				<el-form :model="termForm">
 					<el-form-item label="学期">
-						<el-input></el-input>
+						<el-input v-model="termForm.term"></el-input>
 					</el-form-item>
 				</el-form>
 				<div style="display: flex; flex-direction: row; align-items: center; justify-content: center;">
-					<el-button type="primary" @click="set_Password()" round>开始新学期</el-button>
+					<el-button type="primary" @click="next_Term()" round>开始新学期</el-button>
 				</div>
 			</div>
 
@@ -77,12 +80,16 @@
 		data() {
 			return {
 				info: { name: '', id: '' },
+				currentTerm: '',
 				has_Application: false,
 				options: [{ label: '控制台', value: '/controlhub' }, { label: '学生', value: '/studenttable' }, { label: '教师', value: '/teachertable' }, { label: '课程', value: '/coursetable' }, { label: '开课申请', value: '/application' }],
 				passwordForm: {
 					old: '',
 					new: ''
 				},
+				termForm: {
+					term: ''
+				}
 			}
 		},
 		methods: {
@@ -111,12 +118,38 @@
 						}
 					})
 			},
+			next_Term() {
+				if (this.termForm.term === '') return
+				this.$axios.post("http://127.0.0.1:8000/term/next/", { term: this.termForm.term })
+					.then(res => {
+						if (res.data.state === 'failed') {
+							this.$message.error({
+								message: res.data.data,
+								showClose: true
+							});
+						}
+						else {
+							this.$message.success({
+								message: res.data.data,
+								showClose: true
+							});
+							this.$axios.post("http://127.0.0.1:8000/course/application/has/", {})
+								.then(res => {
+									this.has_Application = res.data.has
+								})
+						}
+					})
+			}
 		},
 		mounted() {
 			this.info = JSON.parse(localStorage.login)
 			this.$axios.post("http://127.0.0.1:8000/course/application/has/", {})
 				.then(res => {
 					this.has_Application = res.data.has
+				})
+			this.$axios.post("http://127.0.0.1:8000/term/current/", {})
+				.then(res => {
+					this.currentTerm = res.data.current
 				})
 		}
 	}

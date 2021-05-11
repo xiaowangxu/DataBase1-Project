@@ -25,9 +25,10 @@ def get_Course(request):
     if (request.method == 'POST'):
         request.params = json.loads(request.body)
         try:
+            term = CurrentTerm.objects.get(id=1)
             t = Teacher.objects.get(id=request.params['tuid'])
             Course.objects.create(name=request.params['name'], cid=request.params['cid'],
-                                  credit=request.params['credit'], depart=request.params['depart'], keys_tid=t)
+                                  credit=request.params['credit'], depart=request.params['depart'], keys_tid=t, term=term.current, accept=True)
         except:
             return JsonResponse({'state': 'failed', 'data': '无法插入表项'})
         else:
