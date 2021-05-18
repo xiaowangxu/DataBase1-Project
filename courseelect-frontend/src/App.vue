@@ -18,7 +18,7 @@
 
 	body {
 		background-color: rgb(93, 167, 252);
-		position: fixed;
+		/* position: fixed; */
 		padding: 80px 200px;
 		left: 0;
 		right: 0;

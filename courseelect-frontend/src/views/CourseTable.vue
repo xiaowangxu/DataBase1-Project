@@ -23,7 +23,30 @@
 						</el-table-column>
 						<el-table-column prop="term" label="学期">
 						</el-table-column>
-						<el-table-column prop="name" label="课名">
+						<!-- <el-table-column prop="name" label="课名">
+						</el-table-column> -->
+						<el-table-column label="课名" width='180'>
+							<template slot-scope="scope">
+
+								<div
+									style="display: flex; flex-direction: row; justify-content: flex-start; gap: 10px; align-items: center;">
+									<!-- <div class="courseinfo"
+										:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}"
+										@click="course_Info(scope.row)">
+									</div> -->
+									<el-popover placement="right" :title="scope.row.name" width="200" trigger="hover">
+										<span>课号：{{scope.row.id}} </span><br>
+										<span>教师：{{scope.row.tname}} </span><br>
+										<span>教师号：{{scope.row.tid}} </span><br>
+										<span>学分：{{scope.row.credit}} </span><br><br>
+										<span>{{scope.row.description}} </span>
+										<div slot="reference" class="courseinfo"
+											:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}">
+										</div>
+									</el-popover>
+									{{scope.row.name}}
+								</div>
+							</template>
 						</el-table-column>
 						<el-table-column prop="credit" label="学分">
 						</el-table-column>
@@ -101,6 +124,9 @@
 						</el-option>
 					</el-select>
 				</el-form-item>
+				<el-form-item label="介绍" prop="description">
+					<el-input type="textarea" v-model="courseForm.description"></el-input>
+				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="addDialog = false" round>取 消</el-button>
@@ -131,6 +157,9 @@
 							:value="item.value">
 						</el-option>
 					</el-select>
+				</el-form-item>
+				<el-form-item label="介绍" prop="description">
+					<el-input type="textarea" v-model="courseModifyForm.description"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -163,7 +192,8 @@
 					name: '',
 					tuid: '',
 					credit: 1,
-					depart: ''
+					depart: '',
+					description: '无描述'
 				},
 				courseModifyForm: {
 					id: -1,
@@ -171,11 +201,27 @@
 					name: '',
 					tuid: '',
 					credit: 1,
-					depart: ''
+					depart: '',
+					description: ''
 				},
 				currentC: undefined,
 				currentCourse: '无选中课程',
-				studentslist: []
+				studentslist: [],
+				Color: [
+					['#9b1645', '#e91e63'],
+					['#e91e63', '#9c27b0'],
+					['#3f51b5', '#2196f3'],
+					['#009688', '#59662c'],
+					['#673ab7', '#3f51b5'],
+					['#ffdd11', '#ff9800'],
+					['#00bcd4', '#009688'],
+					['#ff9800', '#ff5722'],
+					['#9c27b0', '#673ab7'],
+					['#59662c', '#9fa328'],
+					['#2196f3', '#00bcd4'],
+					['#9fa328', '#ffdd11'],
+					['#a32866', '#f44336']
+				]
 			}
 		},
 		methods: {
@@ -258,6 +304,9 @@
 						this.get_Student()
 					})
 			},
+			course_Info(row) {
+				this.$router.push({ name: "CourseInfo", params: row })
+			},
 			get_Student(row) {
 				row = row === undefined ? this.currentC : row
 				this.currentC = row
@@ -265,7 +314,7 @@
 				this.currentCourse = row.cid + " " + row.name
 				this.$axios.post("http://127.0.0.1:8000/students/getByCourse/", { id: row.id })
 					.then(res => {
-						// console.log('res=>', res);
+						console.log('res=>', res);
 						if (res.data.state === 'failed') {
 							this.$message.error({
 								message: res.data.data,
@@ -276,7 +325,7 @@
 							this.studentslist = res.data.list
 						}
 					}).then(() => {
-						this.refresh_CourseList()
+						// this.refresh_CourseList()
 					})
 			},
 			open_modify_Course(row) {
@@ -286,7 +335,8 @@
 					name: row.name,
 					tuid: row.tuid,
 					credit: row.credit,
-					depart: row.depart
+					depart: row.depart,
+					description: row.description
 				}
 				this.$axios.post("http://127.0.0.1:8000/teacher/getDepart/", { depart: this.courseModifyForm.depart })
 					.then(res => {
@@ -350,5 +400,36 @@
 	}
 </script>
 
-<style>
+<style scoped>
+	.courseinfo:hover {
+		opacity: 0.8;
+		transition: 0.1s;
+	}
+
+	.courseinfo {
+		min-width: 32px;
+		min-height: 32px;
+		text-align: center;
+		padding: 4px;
+		border-radius: 50%;
+		color: white;
+		opacity: 1;
+		transition: 0.1s;
+		/* user-select: none; */
+		/* cursor: zoom-in; */
+	}
+
+	.coursecard {
+		border-radius: 10px;
+		box-shadow: #00000026 0px 5px 7px 0px;
+		transform: scale(1) translateY(0px);
+		transition: all .2s ease-out;
+	}
+
+	.coursecard:hover {
+		border-radius: 10px;
+		box-shadow: #00000041 0px 10px 12px 0px;
+		transform: scale(1.01) translateY(-2px);
+		transition: all .2s ease-out;
+	}
 </style>

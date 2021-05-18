@@ -93,7 +93,28 @@
 								style="flex:1;width: 100%; font-weight: bolder; font-size: 16px;">
 								<el-table-column prop="cid" label="课号">
 								</el-table-column>
-								<el-table-column prop="name" label="课名">
+								<el-table-column label="课名" width='180'>
+									<template slot-scope="scope">
+										<div
+											style="display: flex; flex-direction: row; justify-content: flex-start; gap: 10px; align-items: center;">
+											<!-- <div class="courseinfo"
+										:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}"
+										@click="course_Info(scope.row)">
+									</div> -->
+											<el-popover placement="right" :title="scope.row.name" width="200"
+												trigger="hover">
+												<span>课号：{{scope.row.id}} </span><br>
+												<span>教师：{{scope.row.tname}} </span><br>
+												<span>教师号：{{scope.row.tid}} </span><br>
+												<span>学分：{{scope.row.credit}} </span><br><br>
+												<span>{{scope.row.description}} </span>
+												<div slot="reference" class="courseinfo"
+													:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}">
+												</div>
+											</el-popover>
+											{{scope.row.name}}
+										</div>
+									</template>
 								</el-table-column>
 								<el-table-column prop="term" label="学期">
 								</el-table-column>
@@ -187,6 +208,9 @@
 				<el-form-item label="学分" prop="credit">
 					<el-input-number v-model="courseForm.credit" :min="0" :max="10"></el-input-number>
 				</el-form-item>
+				<el-form-item label="介绍" prop="description">
+					<el-input type="textarea" v-model="courseForm.description"></el-input>
+				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="applyDialog = false" round>取 消</el-button>
@@ -219,7 +243,8 @@
 				courseForm: {
 					cid: '',
 					name: '',
-					credit: 1
+					credit: 1,
+					description: '无描述'
 				},
 				applyDialogRules: {
 					cid: [
@@ -391,7 +416,8 @@
 					cid: this.courseForm.cid,
 					name: this.courseForm.name,
 					credit: this.courseForm.credit,
-					tid: this.info.id
+					tid: this.info.id,
+					description: this.courseForm.description
 				}
 				this.$refs.applyForm.validate((valid) => {
 					if (valid) {
@@ -442,6 +468,9 @@
 			},
 			reset_Form(formName) {
 				this.$refs[formName].resetFields();
+			},
+			course_Info(row) {
+				this.$router.push({ name: "CourseInfo", params: row })
 			}
 		},
 		mounted() {
@@ -451,7 +480,7 @@
 	}
 </script>
 
-<style>
+<style scoped>
 	.slide-fade-enter-active {
 		transition: all .2s ease-out;
 	}
@@ -583,5 +612,23 @@
 		box-shadow: #00000041 0px 4px 12px 0px;
 		transform: scale(1.01) translateY(-2px);
 		transition: all .2s ease-out;
+	}
+
+	.courseinfo:hover {
+		opacity: 0.8;
+		transition: 0.1s;
+	}
+
+	.courseinfo {
+		min-width: 32px;
+		min-height: 32px;
+		text-align: center;
+		padding: 4px;
+		border-radius: 50%;
+		color: white;
+		opacity: 1;
+		transition: 0.1s;
+		/* user-select: none; */
+		/* cursor: zoom-in; */
 	}
 </style>

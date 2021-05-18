@@ -128,8 +128,27 @@
 					style="padding: 10px 10px 6px 10px; height: 100%; box-sizing: border-box; overflow: auto;">
 					<div
 						style="display: flex; flex-direction: column; gap: 20px; overflow: visible; align-items: center; font-size: 20px;">
-						<el-transfer v-model="elect" :button-texts="['退课', '选课']" :titles="['可选', '已选']"
-							:data="options">
+						<el-transfer id="elector" v-model="elect" :button-texts="['退课', '选课']" :titles="['可选', '已选']"
+							:data="options" filterable style="height: 100%;">
+							<span slot-scope="{ option }">
+								<div
+									style="display: flex; flex-direction: row; justify-content: flex-start; gap: 10px; align-items: center;">
+
+									<el-popover placement="right" :title="option.data.name" width="200" trigger="hover">
+										<span>课号：{{option.data.id}} </span><br>
+										<span>教师：{{option.data.tname}} </span><br>
+										<span>教师号：{{option.data.tid}} </span><br>
+										<span>学分：{{option.data.credit}} </span><br><br>
+										<span>{{option.data.description}} </span>
+										<div slot="reference" class="courseinfo"
+											:style="{'background': `linear-gradient(45deg, ${Color[(option.key) % Color.length][0]}, ${Color[(option.key) % Color.length][1]})`}">
+										</div>
+									</el-popover>
+									<span>{{option.label}}</span>
+
+								</div>
+
+							</span>
 							<div slot="right-footer"
 								style="width: 100%; height: 100%;display: flex; align-items: center; justify-content: center;">
 
@@ -477,7 +496,7 @@
 							this.creditmap = {}
 							this.options = res.data.list.map((i) => {
 								this.creditmap[i.id] = i.credit
-								return { label: `${i.cid} ${i.name} 教师：${i.tid} ${i.tname} 学分：${i.credit}`, key: i.id, credit: i.credit }
+								return { label: `${i.cid} ${i.name} 教师：${i.tid} ${i.tname} 学分：${i.credit}`, key: i.id, credit: i.credit, data: i }
 							})
 							this.elect = res.data.elected.map((i) => {
 								return i.cuid
@@ -511,6 +530,9 @@
 				if (i < 84) return '3.3'
 				if (i < 89) return '3.7'
 				return '4.0'
+			},
+			course_Info(data) {
+				this.$router.push({ name: "CourseInfo", params: data })
 			}
 		},
 		mounted() {
@@ -522,6 +544,13 @@
 </script>
 
 <style>
+	.el-transfer-panel {
+		width: 400px;
+		height: 400px;
+		margin-bottom: 20px;
+	}
+</style>
+<style scoped>
 	.slide-fade-enter-active {
 		transition: all .2s ease-out;
 	}
@@ -558,11 +587,7 @@
 		opacity: 0.5;
 	}
 
-	.el-transfer-panel {
-		width: 350px;
-		height: 350px;
-		margin-bottom: 20px;
-	}
+
 
 	.container {
 		display: flex;
@@ -653,5 +678,25 @@
 		box-shadow: #00000041 0px 4px 12px 0px;
 		transform: scale(1.01) translateY(-2px);
 		transition: all .2s ease-out;
+	}
+
+	.courseinfo:hover {
+		opacity: 0.8;
+		transition: 0.1s;
+	}
+
+	.courseinfo {
+		min-width: 12px;
+		min-height: 12px;
+		max-width: 12px;
+		max-height: 12px;
+		text-align: center;
+		padding: 4px;
+		border-radius: 50%;
+		color: white;
+		opacity: 1;
+		transition: 0.1s;
+		user-select: none;
+		/* cursor: zoom-in; */
 	}
 </style>

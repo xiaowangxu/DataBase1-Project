@@ -28,14 +28,14 @@ def get_Course(request):
             term = CurrentTerm.objects.get(id=1)
             t = Teacher.objects.get(id=request.params['tuid'])
             Course.objects.create(name=request.params['name'], cid=request.params['cid'],
-                                  credit=request.params['credit'], depart=request.params['depart'], keys_tid=t, term=term.current, accept=True)
+                                  credit=request.params['credit'], depart=request.params['depart'], description=request.params['description'], keys_tid=t, term=term.current, accept=True)
         except:
             return JsonResponse({'state': 'failed', 'data': '无法插入表项'})
         else:
             return JsonResponse({'state': 'ok', 'data': '已添加'})
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT c.id id, c.name name, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id")
+            "SELECT c.id id, c.name name, c.description description, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id")
         ret = list(dictfetchall(cursor))
         return JsonResponse({'list': ret})
 
@@ -45,9 +45,9 @@ def get_Appliction_Paged(request):
         request.params = json.loads(request.body)
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT c.id id, c.name name, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id WHERE C.accept is NULL ORDER BY term DESC, cid")
+                "SELECT c.id id, c.name name, c.credit credit, c.description description, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id WHERE C.accept is NULL ORDER BY term DESC, cid")
             qs = list(dictfetchall(cursor))
-            p = Paginator(qs, 12)
+            p = Paginator(qs, 10)
             pageidx = min(request.params["page"], p.num_pages)
             retStr = list(p.page(pageidx).object_list)
             return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})
@@ -68,9 +68,9 @@ def get_Course_Paged(request):
         request.params = json.loads(request.body)
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT c.id id, c.name name, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id WHERE C.accept is TRUE ORDER BY term DESC, cid")
+                "SELECT c.id id, c.name name, c.description description, c.credit credit, c.cid cid, c.depart depart, t.name tname, t.id tuid, t.tid tid, c.term term FROM course_course c JOIN teacher_teacher t on c.keys_tid_id = t.id WHERE C.accept is TRUE ORDER BY term DESC, cid")
             qs = list(dictfetchall(cursor))
-            p = Paginator(qs, 12)
+            p = Paginator(qs, 10)
             pageidx = min(request.params["page"], p.num_pages)
             retStr = list(p.page(pageidx).object_list)
             return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})
@@ -112,12 +112,12 @@ def get_Course_by_Student(request):
             ret = []
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT C.id id, C.name name, C.cid cid, C.credit credit, C.depart depart, T.name tname, T.id tuid, T.tid tid FROM course_course C JOIN teacher_teacher T on C.keys_tid_id = T.id WHERE C.depart = %s and C.id not in (SELECT cid_id FROM election_election WHERE sid_id = %s and grade is not NULL) and c.term in (SELECT current FROM currentTerm_currentterm)", [s.depart, s.id])
+                    "SELECT C.id id, C.name name, C.cid cid, C.credit credit, C.description description, C.depart depart, T.name tname, T.id tuid, T.tid tid FROM course_course C JOIN teacher_teacher T on C.keys_tid_id = T.id WHERE C.depart = %s and C.id not in (SELECT cid_id FROM election_election WHERE sid_id = %s and grade is not NULL) and C.term in (SELECT current FROM currentTerm_currentterm) and C.accept is True", [s.depart, s.id])
                 ret = list(dictfetchall(cursor))
             ret2 = []
             with connection.cursor() as cursor2:
                 cursor2.execute(
-                    "SELECT C.id cuid, cid, name, credit, depart, term FROM election_election E JOIN course_course C ON E.cid_id = C.id WHERE E.sid_id = %s and E.grade IS NULL and C.depart = %s and C.term in (SELECT current FROM currentTerm_currentterm)", [s.id, s.depart])
+                    "SELECT C.id cuid, cid, name, credit, depart, term, description FROM election_election E JOIN course_course C ON E.cid_id = C.id WHERE E.sid_id = %s and E.grade IS NULL and C.depart = %s and C.term in (SELECT current FROM currentTerm_currentterm)", [s.id, s.depart])
                 ret2 = list(dictfetchall(cursor2))
                 return JsonResponse({'list': ret, 'elected': ret2})
 
@@ -155,6 +155,7 @@ def modify_Course(request):
                 target.keys_tid = t
                 target.credit = request.params['credit']
                 target.depart = request.params['depart']
+                target.description = request.params['description']
                 try:
                     target.save()
                 except:

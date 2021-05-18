@@ -19,7 +19,27 @@
 				</el-table-column>
 				<el-table-column prop="term" label="学期">
 				</el-table-column>
-				<el-table-column prop="name" label="课名">
+				<el-table-column label="课名" width='180'>
+					<template slot-scope="scope">
+						<div
+							style="display: flex; flex-direction: row; justify-content: flex-start; gap: 10px; align-items: center;">
+							<!-- <div class="courseinfo"
+										:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}"
+										@click="course_Info(scope.row)">
+									</div> -->
+							<el-popover placement="right" :title="scope.row.name" width="200" trigger="hover">
+								<span>课号：{{scope.row.id}} </span><br>
+								<span>教师：{{scope.row.tname}} </span><br>
+								<span>教师号：{{scope.row.tid}} </span><br>
+								<span>学分：{{scope.row.credit}} </span><br><br>
+								<span>{{scope.row.description}} </span>
+								<div slot="reference" class="courseinfo"
+									:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}">
+								</div>
+							</el-popover>
+							{{scope.row.name}}
+						</div>
+					</template>
 				</el-table-column>
 				<el-table-column prop="credit" label="学分">
 				</el-table-column>
@@ -61,6 +81,21 @@
 				currentTerm: '',
 				pagescount: 0,
 				currentpage: 0,
+				Color: [
+					['#9b1645', '#e91e63'],
+					['#e91e63', '#9c27b0'],
+					['#3f51b5', '#2196f3'],
+					['#009688', '#59662c'],
+					['#673ab7', '#3f51b5'],
+					['#ffdd11', '#ff9800'],
+					['#00bcd4', '#009688'],
+					['#ff9800', '#ff5722'],
+					['#9c27b0', '#673ab7'],
+					['#59662c', '#9fa328'],
+					['#2196f3', '#00bcd4'],
+					['#9fa328', '#ffdd11'],
+					['#a32866', '#f44336']
+				],
 				options: [/*{ label: '控制台', value: '/controlhub' },*/ { label: '学生', value: '/studenttable' }, { label: '教师', value: '/teachertable' }, { label: '课程', value: '/coursetable' }, { label: '开课申请', value: '/application' }]
 			}
 		},
@@ -119,6 +154,9 @@
 							this.refresh_ApplicationList()
 						}
 					})
+			},
+			course_Info(row) {
+				this.$router.push({ name: "CourseInfo", params: row })
 			}
 		},
 		mounted() {
@@ -131,5 +169,22 @@
 	}
 </script>
 
-<style>
+<style scoped>
+	.courseinfo:hover {
+		opacity: 0.8;
+		transition: 0.1s;
+	}
+
+	.courseinfo {
+		min-width: 32px;
+		min-height: 32px;
+		text-align: center;
+		padding: 4px;
+		border-radius: 50%;
+		color: white;
+		opacity: 1;
+		transition: 0.1s;
+		/* user-select: none; */
+		/* cursor: zoom-in; */
+	}
 </style>

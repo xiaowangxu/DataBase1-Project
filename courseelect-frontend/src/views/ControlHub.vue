@@ -155,7 +155,7 @@
 	}
 </script>
 
-<style>
+<style scoped>
 	.card {
 		border-radius: 10px;
 		box-shadow: #00000026 0px 5px 7px 0px;

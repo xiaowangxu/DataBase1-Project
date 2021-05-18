@@ -32,7 +32,7 @@ def get_Teachers_Paged(request):
     if (request.method == 'POST'):
         request.params = json.loads(request.body)
         qs = Teacher.objects.values()
-        p = Paginator(qs, 12)
+        p = Paginator(qs, 10)
         pageidx = min(request.params["page"], p.num_pages)
         retStr = list(p.page(pageidx).object_list)
         return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})
@@ -168,7 +168,7 @@ def apply_Course(request):
             except Course.DoesNotExist:
                 try:
                     Course.objects.create(name=request.params['name'], cid=request.params['cid'], credit=request.params['credit'],
-                                          term=term.current, depart=teacher.depart, keys_tid=teacher)
+                                          term=term.current, description=request.params['description'], depart=teacher.depart, keys_tid=teacher)
                 except:
                     return JsonResponse({'state': 'failed', 'data': '无法插入表项'})
                 else:
@@ -182,7 +182,7 @@ def get_ApplyCourse(request):
         request.params = json.loads(request.body)
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT C.id id, C.cid cid, C.name name, C.credit credit, C.term term, C.accept accept from course_course C JOIN teacher_teacher T ON C.keys_tid_id = T.id WHERE T.id = %s and  C.term in (SELECT current FROM currentTerm_currentterm CT WHERE CT.id = 1)", [request.params['id']])
+                "SELECT C.id id, C.cid cid, C.name name, C.credit credit, c.description description, C.term term, C.accept accept from course_course C JOIN teacher_teacher T ON C.keys_tid_id = T.id WHERE T.id = %s and  C.term in (SELECT current FROM currentTerm_currentterm CT WHERE CT.id = 1)", [request.params['id']])
             ret = list(dictfetchall(cursor))
             return JsonResponse({'list': ret})
 

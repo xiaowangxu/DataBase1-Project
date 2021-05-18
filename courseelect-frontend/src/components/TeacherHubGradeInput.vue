@@ -464,7 +464,7 @@
 	}
 </script>
 
-<style>
+<style scoped>
 	.el-transfer-panel {
 		width: 350px;
 		height: 350px;

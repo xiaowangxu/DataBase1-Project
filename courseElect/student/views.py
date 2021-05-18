@@ -32,7 +32,7 @@ def get_Students_Paged(request):
     if (request.method == 'POST'):
         request.params = json.loads(request.body)
         qs = Student.objects.values()
-        p = Paginator(qs, 12)
+        p = Paginator(qs, 10)
         pageidx = min(request.params["page"], p.num_pages)
         retStr = list(p.page(pageidx).object_list)
         return JsonResponse({'list': retStr, "pages": p.num_pages, "current": pageidx})

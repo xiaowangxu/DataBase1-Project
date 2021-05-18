@@ -13,7 +13,7 @@
 					<el-input v-model="login.id"></el-input>
 				</el-form-item>
 				<el-form-item label="密码" prop="password">
-					<el-input v-model="login.password"></el-input>
+					<el-input v-model="login.password" show-password></el-input>
 				</el-form-item>
 			</el-form>
 			<el-row style="margin-bottom: 0px;">
@@ -101,5 +101,5 @@
 	}
 </script>
 
-<style>
+<style scoped>
 </style>
