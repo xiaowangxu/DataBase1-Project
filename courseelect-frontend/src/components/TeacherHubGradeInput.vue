@@ -34,11 +34,18 @@
 									style="font-style: normal; font-size: 20px; margin-right: 2px;">共</a>{{studentList.length}}<a
 									style="font-style: normal; font-size: 20px; margin-left: 2px;">人</a></a>
 						</div>
-						<div
+						<div v-if="readonly"
 							style="background-color: white; padding: 5px 12px 5px 11px; border-radius: 5px; height: min-content; align-self: center;">
 							<a style="font-weight: bolder; font-family: consolas;"
 								:style="{'font-size': '30px', 'font-style': 'italic', 'color': colors.color2}">
 								<a style="font-style: normal; font-size: 20px; margin-right: 2px;">均分</a>{{get_Avg}}</a>
+						</div>
+						<div v-else
+							style="background-color: white; padding: 5px 12px 5px 11px; border-radius: 5px; height: min-content; align-self: center;">
+							<a style="font-weight: bolder; font-family: consolas;"
+								:style="{'font-size': '30px', 'font-style': 'italic', 'color': colors.color2}">
+								<a
+									style="font-style: normal; font-size: 20px; margin-right: 2px;">百分比</a>{{courseinfo.grade_percent*100}}%</a>
 						</div>
 					</div>
 				</div>
@@ -71,10 +78,17 @@
 			</el-table-column>
 			<el-table-column prop="name" label="姓名" sortable>
 			</el-table-column>
-			<el-table-column v-if="!readonly" prop="grade" label="成绩" width="140" sortable
+			<el-table-column v-if="!readonly" prop="p_grade" label="平时成绩" width="140" sortable
 				:filters="[{text: '已填写', value: true}, {text: '未填写', value: false}]" :filter-method="filter_Grade">
 				<template slot-scope="scope">
-					<el-input type="number" min="0" max="100" step="1" v-model.number="scope.row.grade">
+					<el-input type="number" min="0" max="100" step="0.1" v-model.number="scope.row.p_grade">
+					</el-input>
+				</template>
+			</el-table-column>
+			<el-table-column v-if="!readonly" prop="e_grade" label="考试成绩" width="140" sortable
+				:filters="[{text: '已填写', value: true}, {text: '未填写', value: false}]" :filter-method="filter_Grade">
+				<template slot-scope="scope">
+					<el-input type="number" min="0" max="100" step="0.1" v-model.number="scope.row.e_grade">
 					</el-input>
 				</template>
 			</el-table-column>
@@ -119,6 +133,7 @@
 						cid: "unknown",
 						credit: -1,
 						depart: "unknown",
+						grade_percent: 0.8,
 						id: -1,
 						name: "unknown",
 						tid: "unknown",
@@ -298,7 +313,7 @@
 						}
 						else {
 							this.studentList = res.data.list
-							this.studentListOld = res.data.list.map((i) => { return i.grade })
+							this.studentListOld = res.data.list.map((i) => { return { p_grade: i.p_grade, e_grade: i.e_grade } })
 							if (this.readonly) {
 								let data = Array(100).fill(0)
 								this.studentList.forEach((i) => {
@@ -333,9 +348,9 @@
 			},
 			update_Grade() {
 				let list = this.studentList.filter((i, idx) => {
-					return i.grade !== this.studentListOld[idx]
+					return i.p_grade !== this.studentListOld[idx].p_grade || i.e_grade !== this.studentListOld[idx].e_grade
 				}).map((i) => {
-					return { id: i.euid, grade: i.grade === '' ? '' : Math.max(Math.min(100, i.grade)) }
+					return { id: i.euid, p_grade: i.p_grade === '' ? '' : Math.max(Math.min(100, i.p_grade)), e_grade: i.e_grade === '' ? '' : Math.max(Math.min(100, i.e_grade)) }
 				})
 				console.log(list)
 				if (list.length <= 0) return
@@ -353,6 +368,7 @@
 								message: '更新成功',
 								showClose: true
 							});
+							this.switch_Course(this.id)
 						}
 					})
 			},

@@ -28,10 +28,10 @@
 										@click="course_Info(scope.row)">
 									</div> -->
 							<el-popover placement="right" :title="scope.row.name" width="200" trigger="hover">
-								<span>课号：{{scope.row.id}} </span><br>
+								<!-- <span>课号：{{scope.row.id}} </span><br>
 								<span>教师：{{scope.row.tname}} </span><br>
 								<span>教师号：{{scope.row.tid}} </span><br>
-								<span>学分：{{scope.row.credit}} </span><br><br>
+								<span>学分：{{scope.row.credit}} </span><br><br> -->
 								<span>{{scope.row.description}} </span>
 								<div slot="reference" class="courseinfo"
 									:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}">
@@ -42,6 +42,8 @@
 					</template>
 				</el-table-column>
 				<el-table-column prop="credit" label="学分">
+				</el-table-column>
+				<el-table-column prop="capacity" label="容量">
 				</el-table-column>
 				<el-table-column prop="tid" label="工号">
 				</el-table-column>

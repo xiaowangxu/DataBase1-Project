@@ -58,7 +58,8 @@
 												<a style="font-weight: bolder; font-family: consolas;"
 													:style="{'font-size': '30px', 'font-style': 'italic', 'color': Color[(item.id) % Color.length][1]}">{{Math.round(item.avg*100)/100}}</a>
 											</div>
-											<div style="display: flex; flex-direction: row; gap: 10px;">
+											<div
+												style="display: flex; flex-direction: row; gap: 10px; margin-bottom: 4px;">
 												<el-button v-if="item.term !== currentTerm" size="small"
 													icon="el-icon-more" circle
 													style="margin: none;align-self: flex-end;"
@@ -103,10 +104,10 @@
 									</div> -->
 											<el-popover placement="right" :title="scope.row.name" width="200"
 												trigger="hover">
-												<span>课号：{{scope.row.id}} </span><br>
+												<!-- <span>课号：{{scope.row.id}} </span><br>
 												<span>教师：{{scope.row.tname}} </span><br>
 												<span>教师号：{{scope.row.tid}} </span><br>
-												<span>学分：{{scope.row.credit}} </span><br><br>
+												<span>学分：{{scope.row.credit}} </span><br><br> -->
 												<span>{{scope.row.description}} </span>
 												<div slot="reference" class="courseinfo"
 													:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}">
@@ -119,6 +120,10 @@
 								<el-table-column prop="term" label="学期">
 								</el-table-column>
 								<el-table-column prop="credit" label="学分">
+								</el-table-column>
+								<el-table-column prop="grade_percent" label="成绩构成">
+								</el-table-column>
+								<el-table-column prop="capacity" label="容量">
 								</el-table-column>
 								<el-table-column label="状态">
 									<template slot-scope="scope">
@@ -208,6 +213,13 @@
 				<el-form-item label="学分" prop="credit">
 					<el-input-number v-model="courseForm.credit" :min="0" :max="10"></el-input-number>
 				</el-form-item>
+				<el-form-item label="分数构成" prop="grade_percent">
+					<el-input-number v-model="courseForm.grade_percent" :min="0" :max="1" step="0.1">
+					</el-input-number>
+				</el-form-item>
+				<el-form-item label="容量" prop="capacity">
+					<el-input-number v-model="courseForm.capacity" :min="0" :max="1000"></el-input-number>
+				</el-form-item>
 				<el-form-item label="介绍" prop="description">
 					<el-input type="textarea" v-model="courseForm.description"></el-input>
 				</el-form-item>
@@ -244,7 +256,9 @@
 					cid: '',
 					name: '',
 					credit: 1,
-					description: '无描述'
+					description: '无描述',
+					capacity: 50,
+					grade_percent: 0.8
 				},
 				applyDialogRules: {
 					cid: [
@@ -375,10 +389,17 @@
 						}
 					}).then((res) => {
 						if (res) {
-							if (!this.termList.map(t => t.term).includes(this.selectedTerm)) {
-								this.selectedTerm = this.termList[0].term
+							if (this.termList.length > 0) {
+								if (!this.termList.map(t => t.term).includes(this.selectedTerm)) {
+									console.log(this.termList)
+									this.selectedTerm = this.termList[0].term
+								}
+								this.get_Course(this.info.id, this.selectedTerm)
 							}
-							this.get_Course(this.info.id, this.selectedTerm)
+							else {
+								this.selectedTerm = undefined
+								this.courseList = []
+							}
 						}
 					})
 			},
@@ -417,7 +438,9 @@
 					name: this.courseForm.name,
 					credit: this.courseForm.credit,
 					tid: this.info.id,
-					description: this.courseForm.description
+					description: this.courseForm.description,
+					capacity: this.courseForm.capacity,
+					grade_percent: this.courseForm.grade_percent
 				}
 				this.$refs.applyForm.validate((valid) => {
 					if (valid) {

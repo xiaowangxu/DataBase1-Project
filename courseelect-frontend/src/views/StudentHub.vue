@@ -81,11 +81,11 @@
 														style="font-style: normal; font-size: 20px; margin-right: 2px;">成绩</a>{{item.grade}}</a>
 											</div>
 											<div
-												style="background-color: white; padding: 5px 12px 5px 11px; border-radius: 5px; height: min-content; align-self: center;">
+												style="background-color: white; padding: 5px 12px 5px 11px; border-radius: 5px; height: min-content; align-self: flex-end;">
 												<a style="font-weight: bolder; font-family: consolas;"
 													:style="{'font-size': '30px', 'font-style': 'italic', 'color': Color[(item.id) % Color.length][1]}">
 													<a
-														style="font-style: normal; font-size: 20px; margin-right: 2px;">绩点</a>{{get_GPA_Str(item.grade)}}</a>
+														style="font-style: normal; font-size: 20px; margin-right: 2px;">绩点</a>{{item.gpa}}</a>
 											</div>
 										</template>
 
@@ -138,7 +138,8 @@
 										<span>课号：{{option.data.id}} </span><br>
 										<span>教师：{{option.data.tname}} </span><br>
 										<span>教师号：{{option.data.tid}} </span><br>
-										<span>学分：{{option.data.credit}} </span><br><br>
+										<span>学分：{{option.data.credit}} </span><br>
+										<span>容量：{{option.data.currentcount}}/{{option.data.capacity}} </span><br><br>
 										<span>{{option.data.description}} </span>
 										<div slot="reference" class="courseinfo"
 											:style="{'background': `linear-gradient(45deg, ${Color[(option.key) % Color.length][0]}, ${Color[(option.key) % Color.length][1]})`}">
@@ -307,10 +308,10 @@
 				let sumt = 0
 				this.courseList.filter((i) => {
 					if (i.grade !== null) {
-						sum += i.grade
+						sum += parseFloat(i.grade)
 						count++
 						sumt += i.credit
-						sumcredit += this.get_GPA(i.grade) * i.credit
+						sumcredit += parseFloat(i.gpa) * i.credit
 						totalcredit += i.credit
 						return true
 					}
@@ -362,10 +363,17 @@
 					}).then((res) => {
 						console.log(res)
 						if (res) {
-							if (!this.termList.map(t => t.term).includes(this.selectedTerm)) {
-								this.selectedTerm = this.termList[0].term
+							if (this.termList.length > 0) {
+								if (!this.termList.map(t => t.term).includes(this.selectedTerm)) {
+									this.selectedTerm = this.termList[0].term
+								}
+								this.get_Course(this.info.id, this.selectedTerm)
 							}
-							this.get_Course(this.info.id, this.selectedTerm)
+							else {
+								this.selectedTerm = undefined
+								this.courseList = []
+							}
+
 						}
 					})
 			},
@@ -382,8 +390,9 @@
 						else {
 							let list = res.data.list
 							if (list.length === 0) return
-							this.grade.avg = Math.round(list.reduce((a, i) => { return a + i.avg }, 0) / list.length * 100) / 100
-							this.grade.gpa = Math.round(list.reduce((a, i) => { return a + i.gpa }, 0) / list.length * 100) / 100
+							// console.log("<>", list)
+							this.grade.avg = Math.round(list.reduce((a, i) => { return a + parseFloat(i.avg) }, 0) / list.length * 100) / 100
+							this.grade.gpa = Math.round(list.reduce((a, i) => { return a + parseFloat(i.gpa) }, 0) / list.length * 100) / 100
 							this.chart2 = new Chart(this.$refs.courseChart1, {
 								type: 'line',
 								data: {
@@ -518,18 +527,6 @@
 				if (i < 84) return 3.3
 				if (i < 89) return 3.7
 				return 4.0
-			},
-			get_GPA_Str(i) {
-				if (i < 60) return '0.0'
-				if (i < 63) return '1.0'
-				if (i < 67) return '1.7'
-				if (i < 71) return '2.0'
-				if (i < 74) return '2.3'
-				if (i < 77) return '2.7'
-				if (i < 81) return '3.0'
-				if (i < 84) return '3.3'
-				if (i < 89) return '3.7'
-				return '4.0'
 			},
 			course_Info(data) {
 				this.$router.push({ name: "CourseInfo", params: data })

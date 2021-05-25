@@ -38,7 +38,8 @@
 										<span>课号：{{scope.row.id}} </span><br>
 										<span>教师：{{scope.row.tname}} </span><br>
 										<span>教师号：{{scope.row.tid}} </span><br>
-										<span>学分：{{scope.row.credit}} </span><br><br>
+										<span>学分：{{scope.row.credit}} </span><br>
+										<span>容量：{{scope.row.currentcount}}/{{scope.row.capacity}} </span><br><br>
 										<span>{{scope.row.description}} </span>
 										<div slot="reference" class="courseinfo"
 											:style="{'background': `linear-gradient(45deg, ${Color[(scope.row.id) % Color.length][0]}, ${Color[(scope.row.id) % Color.length][1]})`}">
@@ -110,6 +111,9 @@
 				<el-form-item label="学分" prop="credit">
 					<el-input-number v-model="courseForm.credit" :min="0" :max="10"></el-input-number>
 				</el-form-item>
+				<el-form-item label="容量" prop="capacity">
+					<el-input-number v-model="courseForm.capacity" :min="0" :max="1000"></el-input-number>
+				</el-form-item>
 				<el-form-item label="学院" require prop="depart">
 					<el-select v-model="courseForm.depart" placeholder="请选择" style="width: 100%;"
 						@change="on_addCourse_Depart_changed($event)">
@@ -143,6 +147,9 @@
 				</el-form-item>
 				<el-form-item label="学分" prop="credit">
 					<el-input-number v-model="courseModifyForm.credit" :min="0" :max="10"></el-input-number>
+				</el-form-item>
+				<el-form-item label="容量" prop="capacity">
+					<el-input-number v-model="courseModifyForm.capacity" :min="0" :max="1000"></el-input-number>
 				</el-form-item>
 				<el-form-item label="学院" require prop="depart">
 					<el-select v-model="courseModifyForm.depart" placeholder="请选择" style="width: 100%;"
@@ -193,7 +200,8 @@
 					tuid: '',
 					credit: 1,
 					depart: '',
-					description: '无描述'
+					description: '无描述',
+					capacity: 50
 				},
 				courseModifyForm: {
 					id: -1,
@@ -202,7 +210,8 @@
 					tuid: '',
 					credit: 1,
 					depart: '',
-					description: ''
+					description: '',
+					capacity: 0
 				},
 				currentC: undefined,
 				currentCourse: '无选中课程',
@@ -336,7 +345,8 @@
 					tuid: row.tuid,
 					credit: row.credit,
 					depart: row.depart,
-					description: row.description
+					description: row.description,
+					capacity: row.capacity
 				}
 				this.$axios.post("http://127.0.0.1:8000/teacher/getDepart/", { depart: this.courseModifyForm.depart })
 					.then(res => {
