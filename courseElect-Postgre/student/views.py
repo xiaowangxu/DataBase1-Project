@@ -70,7 +70,7 @@ def delete_Students(request):
 
 def modify_Student(request):
     if (request.method == 'POST'):
-        print(request.body)
+        # print(request.body)
         request.params = json.loads(request.body)
         try:
             target = Student.objects.get(id=request.params['id'])

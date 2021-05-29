@@ -90,7 +90,7 @@ def set_Teacher(request):
 
 def delete_Teacher(request):
     if (request.method == 'POST'):
-        print(request.body)
+        # print(request.body)
         request.params = json.loads(request.body)
         try:
             target = Teacher.objects.get(id=request.params['id'])

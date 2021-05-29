@@ -185,7 +185,7 @@ def modify_Application(request):
 def get_By_Course(request):
     if (request.method == 'POST'):
         request.params = json.loads(request.body)
-        print(request.params)
+        # print(request.params)
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT S.sid as sid, S.name as name, E.grade as grade, E.id as eid, E.cid_id as cid FROM election_election E JOIN student_student S ON S.id = E.sid_id WHERE cid_id = %s", [request.params['id']])

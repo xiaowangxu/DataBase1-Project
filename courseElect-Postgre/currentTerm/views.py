@@ -2,27 +2,31 @@ from django.shortcuts import render
 from currentTerm.models import CurrentTerm
 from course.models import Course
 from django.http import JsonResponse
+from django.db import connection
 import json
 
 # Create your views here.
 
 
+def dictfetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+
+
 def next_Term(request):
     if (request.method == 'POST'):
         request.params = json.loads(request.body)
-        term = CurrentTerm.objects.get(id=1)
-        if (request.params['term'] == term.current):
-            return JsonResponse({'state': 'failed', 'data': '已是当前学期'})
-        try:
-            target = Course.objects.get(term=request.params['term'])
-        except Course.DoesNotExist:
-            term.current = request.params['term']
-            term.save()
-            return JsonResponse({'state': 'ok', 'data': '进入下一学期！'})
-        except:
-            return JsonResponse({'state': 'failed', 'data': '学期重复'})
-        else:
-            return JsonResponse({'state': 'failed', 'data': '学期重复'})
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT new_term(%s)", [request.params['term']])
+            ret = list(dictfetchall(cursor))[0]
+            if (ret['new_term'] == 'success'):
+                return JsonResponse({'state': 'ok', 'data': '进入下一学期了！！！'})
+            else:
+                return JsonResponse({'state': 'failed', 'data': ret['new_term']})
 
 
 def current_Term(request):
